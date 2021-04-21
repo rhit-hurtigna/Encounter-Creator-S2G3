@@ -1,4 +1,11 @@
-CREATE PROCEDURE build_tables
+USE [EncounterCreatorS2G3]
+GO
+/****** Object:  StoredProcedure [dbo].[build_tables]    Script Date: 4/21/2021 15:22:00 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+ALTER PROCEDURE [dbo].[build_tables]
 (@Delete_existing_1 [bit] = 0)
 AS
 
@@ -17,7 +24,7 @@ AS
 -- Revision History
 -- Created 4/14/21 Nathan Hurtig, Michael Webb, Jackson Hajer
 -- Modified 4/15/21 Nathan Hurtig Made IDs auto-increment, added authentication to DM
-  
+-- Modified 4/21/21 Jackson Hajer Made sure proper action is taken with delete and added additional constraints
 -- Check that parameters are good  
 -- Is Delete_existing either a 0 or 1?
 
@@ -80,7 +87,8 @@ IF NOT EXISTS (Select * From sys.tables Where name = 'Member') Create Table Memb
 	Unique(Name, PartyID),
 	Primary Key(ID),
 	Foreign Key (PartyID) References Party(ID) ON DELETE CASCADE,
-	CHECK(Level >= 0)
+	CHECK(Level >= 1 and Level <= 20),
+	CHECK(Alignment in ('LG', 'NG', 'CG', 'LN', 'TN', 'CN', 'LE', 'NE', 'CE'))
 )
 
 IF NOT EXISTS (Select * From sys.tables Where name = 'Book') Create Table Book
@@ -109,8 +117,9 @@ IF NOT EXISTS (Select * From sys.tables Where name = 'Monster') Create Table Mon
 	Alignment varchar(2),
 	PRIMARY KEY (ID),
 	FOREIGN KEY (BookID) REFERENCES Book ON DELETE SET NULL,
-	FOREIGN KEY (TypeID) REFERENCES Type,
-	CHECK(CR >= 0)
+	FOREIGN KEY (TypeID) REFERENCES Type ON DELETE SET NULL,
+	CHECK(CR >= 0 and CR <= 30),
+	CHECK(Alignment in ('LG', 'NG', 'CG', 'LN', 'TN', 'CN', 'LE', 'NE', 'CE'))
 )
 
 IF NOT EXISTS (SELECT * FROM sys.tables WHERE name='Action') CREATE TABLE Action
