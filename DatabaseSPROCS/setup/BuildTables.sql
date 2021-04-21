@@ -65,7 +65,7 @@ IF NOT EXISTS (Select * From sys.tables Where name = 'Party') Create Table Party
 	DMID int NOT NULL,
 	Unique(Name, DMID),
 	Primary Key(ID),
-	Foreign Key(DMID) References DM(ID) ON DELETE CASCADE
+	Foreign Key(DMID) References DM(ID) ON DELETE CASCADE  -- Don't want DM-less parties
 )
 
 IF NOT EXISTS (Select * From sys.tables Where name = 'Member') Create Table Member
@@ -79,7 +79,7 @@ IF NOT EXISTS (Select * From sys.tables Where name = 'Member') Create Table Memb
 	Alignment varchar(2),
 	Unique(Name, PartyID),
 	Primary Key(ID),
-	Foreign Key (PartyID) References Party(ID) ON DELETE CASCADE,
+	Foreign Key (PartyID) References Party(ID) ON DELETE CASCADE,  -- Don't want party-less members
 	CHECK(Level >= 0)
 )
 
@@ -108,8 +108,8 @@ IF NOT EXISTS (Select * From sys.tables Where name = 'Monster') Create Table Mon
 	BookID int,
 	Alignment varchar(2),
 	PRIMARY KEY (ID),
-	FOREIGN KEY (BookID) REFERENCES Book ON DELETE SET NULL,
-	FOREIGN KEY (TypeID) REFERENCES Type,
+	FOREIGN KEY (BookID) REFERENCES Book,  -- Monsters can have no book (custom monsters), but we shouldn't be able to delete a book that's being used anyways
+	FOREIGN KEY (TypeID) REFERENCES Type,  -- Monsters can have no type, but we shouldn't be able to delete a type anyways
 	CHECK(CR >= 0)
 )
 
@@ -127,8 +127,8 @@ IF NOT EXISTS (SELECT * FROM sys.tables WHERE name='MonsterActions') CREATE TABL
 	MonsterID int,
 	ActionID int,
 	PRIMARY KEY(MonsterID, ActionID),
-	FOREIGN KEY(MonsterID) REFERENCES Monster ON DELETE CASCADE,
-	FOREIGN KEY(ActionID) REFERENCES Action ON DELETE CASCADE
+	FOREIGN KEY(MonsterID) REFERENCES Monster ON DELETE CASCADE,  -- MonsterActions 'belong' to monsters
+	FOREIGN KEY(ActionID) REFERENCES Action  -- No reason to allow deletion of actions in use
 )
 
 IF NOT EXISTS (SELECT * FROM sys.tables WHERE name='MemberActions') CREATE TABLE MemberActions
@@ -136,8 +136,8 @@ IF NOT EXISTS (SELECT * FROM sys.tables WHERE name='MemberActions') CREATE TABLE
 	MemberID int,
 	ActionID int,
 	PRIMARY KEY(MemberID, ActionID),
-	FOREIGN KEY(MemberID) REFERENCES Member ON DELETE CASCADE,
-	FOREIGN KEY(ActionID) REFERENCES Action ON DELETE CASCADE
+	FOREIGN KEY(MemberID) REFERENCES Member ON DELETE CASCADE,  -- MemberActions 'belong' to members
+	FOREIGN KEY(ActionID) REFERENCES Action  -- No reason to allow deletion of actions in use
 )
 
 IF NOT EXISTS (SELECT * FROM sys.tables WHERE name='LikedMonsters') CREATE TABLE LikedMonsters
@@ -145,8 +145,8 @@ IF NOT EXISTS (SELECT * FROM sys.tables WHERE name='LikedMonsters') CREATE TABLE
 	DMID int,
 	MonsterID int,
 	PRIMARY KEY(DMID, MonsterID),
-	FOREIGN KEY(DMID) REFERENCES DM ON DELETE CASCADE,
-	FOREIGN KEY(MonsterID) REFERENCES Monster ON DELETE CASCADE
+	FOREIGN KEY(DMID) REFERENCES DM ON DELETE CASCADE,  -- Preferences belong to the DM
+	FOREIGN KEY(MonsterID) REFERENCES Monster ON DELETE CASCADE  -- In case if we need to delete a monster, whether a DM likes it or not won't be part of that decision
 )
 
 IF NOT EXISTS (SELECT * FROM sys.tables WHERE name='LikedTypes') Create Table LikedTypes
@@ -154,8 +154,8 @@ IF NOT EXISTS (SELECT * FROM sys.tables WHERE name='LikedTypes') Create Table Li
 	DMID int,
 	TypeID int,
 	Primary Key(DMID, TypeID),
-	FOREIGN KEY (DMID) REFERENCES DM ON DELETE CASCADE,
-	FOREIGN KEY (TypeID) REFERENCES Type ON DELETE CASCADE
+	FOREIGN KEY (DMID) REFERENCES DM ON DELETE CASCADE,  -- Preferences belong to DM
+	FOREIGN KEY (TypeID) REFERENCES Type ON DELETE CASCADE  -- In case if we need to delete a type, whether a DM likes it or not won't be part of that decision
 )
 
 IF NOT EXISTS (SELECT * FROM sys.tables WHERE name='DMBooks') Create Table DMBooks
@@ -163,8 +163,8 @@ IF NOT EXISTS (SELECT * FROM sys.tables WHERE name='DMBooks') Create Table DMBoo
 	DMID int,
 	BookID int,
 	PRIMARY KEY(DMID, BookID),
-	FOREIGN KEY (DMID) REFERENCES DM ON DELETE CASCADE,
-	FOREIGN KEY (BookID) REFERENCES Book ON DELETE CASCADE
+	FOREIGN KEY (DMID) REFERENCES DM ON DELETE CASCADE,  -- Literally belongs to DM
+	FOREIGN KEY (BookID) REFERENCES Book ON DELETE CASCADE  -- If a book needs to be deleted, it doesn't matter how many DMs own it
 )
 
 RETURN 0
