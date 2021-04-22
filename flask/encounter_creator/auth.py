@@ -35,14 +35,18 @@ def register():
             hashed_password = hashlib.sha512((password + salt).encode('utf-8')).hexdigest()
             cursor.execute(
                 "DECLARE @Status SMALLINT "
-                "EXEC @Status = add_user @Username_1 = ?, @Salt_2 = ?, @PasswordHash_3 = ? "
-                "SELECT @Status AS status",
+                "DECLARE @NewID INT "
+                "EXEC @Status = add_user @Username_1 = ?, @Salt_2 = ?, @PasswordHash_3 = ?, @NewID_4 = @NewID OUTPUT "
+                "SELECT @Status AS status, @NewID AS ID",
                 (username, salt, hashed_password)
             )
-            status = cursor.fetchone().status
+            row = cursor.fetchone()
+            status = row.status
             if status == 0:
                 cursor.commit()
-                return redirect(url_for('auth.login'))
+                session.clear()
+                session['user_id'] = row.ID
+                return redirect(url_for('index'))
             elif status == 1:
                 print("Safety check for bad username should have triggered earlier in registration view!")
                 error = 'Username is required.'

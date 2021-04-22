@@ -1,11 +1,4 @@
-USE [EncounterCreatorS2G3]
-GO
-/****** Object:  StoredProcedure [dbo].[build_tables]    Script Date: 4/21/2021 15:22:00 ******/
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-ALTER PROCEDURE [dbo].[build_tables]
+CREATE PROCEDURE [dbo].[build_tables]
 (@Delete_existing_1 [bit] = 0)
 AS
 
