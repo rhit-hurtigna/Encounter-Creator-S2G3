@@ -99,3 +99,59 @@ def create():
 
     flash(error)
     return redirect(url_for('parties.parties'))
+
+
+@bp.route('/edit', methods=['POST'])
+@login_required
+def edit():
+    name = request.form['name']
+    party_id = request.form['partyID']
+
+    error = None
+    cursor = get_cursor()
+
+    if not name:
+        error = 'Party name is required.'
+    elif len(name) > 30:
+        error = 'Party name too long - maximum 30 characters.'
+    elif party_id == "":
+        print("Was someone messing with the edit party form? Empty ID.")
+        error = 'Sorry, something went wrong on our end.'
+
+    if error is None:
+        cursor.execute("DECLARE @Status SMALLINT "
+                       "EXEC @Status = edit_party @DMID_1=?, @PartyID_2=?, @Name_3=? "
+                       "SELECT @Status AS status",
+                       session.get('user_id'), party_id, name)
+        status = cursor.fetchval()
+
+        if status == 0:
+            cursor.commit()
+            return redirect(url_for('parties.parties'))
+        elif status == 1:
+            print("Somehow, the DMID is null? Logging out")
+            flash("Sorry, something went wrong on our end.")
+            return redirect(url_for('auth.logout'))
+        elif status == 2:
+            print("Someone is trying to screw with our procedures! DM ID does not exist!")
+            flash("Sorry, something went wrong on our end.")
+            return redirect(url_for('auth.logout'))
+        elif status == 3:
+            print("Bad party ID!")
+            error = 'Sorry, something went wrong on our end.'
+        elif status == 4:
+            print("Nonexistent party!")
+            error = 'Sorry, something went wrong on our end.'
+        elif status == 5:
+            error = 'Party name is required.'
+        elif status == 6:
+            error = 'You already have a party of that name!'
+        elif status == 7:
+            print("Someone is trying to edit a party they don't own!")
+            error = 'Sorry, something went wrong on our end.'
+        else:
+            print("Unknown error code in create_party:", status)
+            error = 'Server error - try again?'
+
+    flash(error)
+    return redirect(url_for('parties.parties'))
