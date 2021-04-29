@@ -23,7 +23,8 @@ AS
 -------------------------------------------  
 -- Revision History
 -- Created 4/16/21 Nathan Hurtig
---
+-- Altered 4/29/21 Nathan Hurtig to allow pyodbc
+-- to access status codes on error
 
 -- Turn NOCOUNT on because pydobc gets confused
 SET NOCOUNT ON
@@ -33,14 +34,12 @@ SET NOCOUNT ON
 -- Is ID good?
 IF (@ID_1 is null)
 BEGIN
-  RAISERROR('ID must not be null', 10, 2)
   RETURN 1
 END
 
 -- Check if party exists
 IF NOT EXISTS (SELECT * FROM Party WHERE ID=@ID_1)
 BEGIN
-  RAISERROR('Party not in table', 10, 1)
   RETURN 2
 END
 

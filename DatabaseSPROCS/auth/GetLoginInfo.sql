@@ -21,6 +21,8 @@ AS
 -------------------------------------------  
 -- Revision History
 -- Created 4/16/21
+-- Altered 4/29/21 Nathan Hurtig to allow pyodbc
+-- to access status codes on error
 --
 
 -- Turn NOCOUNT on because pydobc gets confused
@@ -31,14 +33,12 @@ SET NOCOUNT ON
 -- Is Username good?
 IF (@Username_1 is null)
 BEGIN
-  RAISERROR('Username must not be null', 10, 2)
   RETURN 1
 END
 
 -- Check if DM exists
 IF NOT EXISTS (SELECT * FROM DM WHERE Username=@Username_1)
 BEGIN
-  RAISERROR('Username not in table already', 10, 1)
   RETURN 2
 END
 

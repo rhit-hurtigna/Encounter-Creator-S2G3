@@ -25,8 +25,9 @@ AS
 -- SELECT Status = @Status
 -------------------------------------------  
 -- Revision History
--- Created 4/16/21
---
+-- Created 4/16/21 Nathan Hurtig
+-- Modified 4/29/21 Nathan Hurtig allowing pyodbc to
+-- access status codes
 
 -- Turn NOCOUNT on because pydobc gets confused
 SET NOCOUNT ON
@@ -36,14 +37,12 @@ SET NOCOUNT ON
 -- Is ID good?
 IF (@ID_1 is null)
 BEGIN
-  RAISERROR('ID must not be null', 10, 1)
   RETURN 1
 END
 
 -- Check if DM exists
 IF NOT EXISTS (SELECT * FROM DM WHERE ID=@ID_1)
 BEGIN
-  RAISERROR('DM not in table', 10, 1)
   RETURN 2
 END
 

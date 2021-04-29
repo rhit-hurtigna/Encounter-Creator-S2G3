@@ -27,6 +27,8 @@ AS
 -- Revision History
 -- Created 4/16/21 Nathan Hurtig
 -- Modified 4/22/21 Nathan Hurtig to return ID of new user
+-- Modified 4/29/21 Nathan Hurtig to allow pyodbc
+-- to access status codes on error
 -- 
 
 -- Turn NOCOUNT on because pydobc gets confused
@@ -37,27 +39,23 @@ SET NOCOUNT ON
 -- Is Username good?
 IF (@Username_1 is null)
 BEGIN
-  RAISERROR('Username must not be null', 10, 1)
   RETURN 1
 END
 
 IF EXISTS (SELECT * FROM DM WHERE Username=@Username_1)
 BEGIN
-  RAISERROR('Username already taken', 10, 1)
   RETURN 2
 END
 
 -- Is salt good?
 IF (@Salt_2 is null)
 BEGIN
-  RAISERROR('Salt must not be null', 10, 1)
   RETURN 3
 END
 
 -- Is password good?
 IF (@PasswordHash_3 is null)
 BEGIN
-  RAISERROR('Password hash must not be null', 10, 1)
   RETURN 4
 END
 
