@@ -2,6 +2,7 @@
 Nathan Hurtig - 4/16/21
 from https://flask.palletsprojects.com/en/1.1.x/tutorial/blog/
 """
+import pyodbc
 from flask import (
     Blueprint, flash, g, redirect, render_template, request, url_for, session
 )
@@ -35,9 +36,12 @@ def parties():
                        "EXEC @Status = get_party_members @ID_1=? "
                        "SELECT @Status AS status", party_id)
 
-        party = {'id': party_id, 'name': name, 'members': cursor.fetchall()}
-        cursor.nextset()
-        status = cursor.fetchval()
+        try:
+            party = {'id': party_id, 'name': name, 'members': cursor.fetchall()}
+            cursor.nextset()
+            status = cursor.fetchval()
+        except pyodbc.ProgrammingError:
+            status = party['members'][0][0]
 
         if status == 0:
             parties_list.append(party)
@@ -45,7 +49,7 @@ def parties():
             print("Safety check for null ID in parties view should have triggered earlier!")
             continue
         elif status == 2:
-            print("Safety check for nonexistent table should have triggered earlier!")
+            print("Party no longer exists!")
             continue
         else:
             print("Unknown error code for get_party_members:", status)
