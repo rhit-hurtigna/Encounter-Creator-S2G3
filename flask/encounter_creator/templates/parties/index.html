@@ -2,9 +2,8 @@
 
 {% block header %}
   <h1>{% block title %}Parties{% endblock %}</h1>
-  <a class="action" href="{{ url_for('parties.create') }}">New</a>
+  <button type="button" class="btn btn-primary" data-target="#createPartyModal" data-toggle="modal">New Party</button>
 {% endblock %}
-
 {% block content %}
   {% for party in parties %}
     <article class="post">
@@ -12,7 +11,7 @@
         <div>
           <h1>{{ party['name'] }}</h1>
         </div>
-          <a class="action" href="{{ url_for('main.index', id=party['id']) }}">Edit</a>
+          <button type="button" class="btn btn-primary" href="{{ url_for('main.index', id=party['id']) }}">Edit</button>
       </header>
       <p class="body">
         {% for member in party %}
@@ -24,4 +23,28 @@
       <hr>
     {% endif %}
   {% endfor %}
+
+<div class="modal fade" id="createPartyModal" tabindex="-1" role="dialog" aria-labelledby="createPartyModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="createPartyModalLabel">Create a Party</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <form method="post" action="/parties/create">
+        <div class="modal-body">
+            <label for="name">Party Name</label>
+            <input name="name" id="name" maxlength="30" required>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+          <input type="submit" class="btn btn-primary" value="Create Party">
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
 {% endblock %}
