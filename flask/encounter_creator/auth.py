@@ -6,6 +6,7 @@ import functools
 import hashlib
 import uuid
 
+import pyodbc
 from flask import Blueprint, flash, redirect, render_template, request, url_for, session, g
 
 from .db import get_cursor
@@ -27,8 +28,6 @@ def register():
             error = 'Username too long - maximum 30 characters.'
         elif not password:
             error = 'Password is required.'
-        elif cursor.execute('SELECT ID FROM DM WHERE Username = ?', username).fetchone():
-            error = 'Registration error.'
 
         if error is None:
             salt = uuid.uuid4().hex
@@ -51,7 +50,6 @@ def register():
                 print("Safety check for bad username should have triggered earlier in registration view!")
                 error = 'Username is required.'
             elif status == 2:
-                print("Safety check for taken username should have triggered earlier in registration view!")
                 error = 'Registration error.'  # Username already taken
             elif status == 3:
                 print("Error with salt function! Salt returned '", salt, "'")
@@ -79,8 +77,6 @@ def login():
             error = 'Username is required.'
         elif not password:
             error = 'Password is required.'
-        elif not cursor.execute('SELECT id FROM DM WHERE Username = ?', username).fetchone():
-            error = 'Login error.'
 
         if error is None:
             row = cursor.execute(
@@ -90,7 +86,12 @@ def login():
                 username
             ).fetchone()
             cursor.nextset()
-            status = cursor.fetchval()
+
+            try:
+                status = cursor.fetchval()
+            except pyodbc.ProgrammingError:
+                status = row[0]
+
             if status == 0:
                 if hashlib.sha512((password + row.salt).encode('utf-8')).hexdigest() == row.hash:
                     session.clear()
@@ -102,7 +103,6 @@ def login():
                 print("Safety check for bad username should have been triggered earlier in login view!")
                 error = 'Username is required.'
             elif status == 2:
-                print("Safety check for nonexistent user should have been triggered earlier in login view!")
                 error = 'Login error.'  # Username not already in table
             else:
                 print("Unknown error code in get_login_info:", status)
@@ -123,35 +123,36 @@ def load_logged_in_user():
     else:
         g.user = {}
         cursor = get_cursor()
-
-        if not cursor.execute('SELECT Username FROM DM WHERE ID = ?', user_id).fetchone():
-            print("Somehow, we dropped a user mid-session!")
-            session['user_id'] = None
-            return redirect(url_for('auth.logout'))
-
         cursor.execute("DECLARE @Status SMALLINT "
                        "EXEC @Status = get_user_info @ID_1 = ? "
                        "SELECT @Status AS status", user_id)
 
-        g.user['username'] = cursor.fetchval()
-        cursor.nextset()
-        g.user['parties'] = cursor.fetchall()
-        cursor.nextset()
-        g.user['books'] = cursor.fetchall()
-        cursor.nextset()
-        g.user['monsters'] = cursor.fetchall()
-        cursor.nextset()
-        g.user['types'] = cursor.fetchall()
-        cursor.nextset()
-        status = cursor.fetchval()
+        try:
+            g.user['username'] = cursor.fetchval()
+            cursor.nextset()
+            g.user['parties'] = cursor.fetchall()
+            cursor.nextset()
+            g.user['books'] = cursor.fetchall()
+            cursor.nextset()
+            g.user['monsters'] = cursor.fetchall()
+            cursor.nextset()
+            g.user['types'] = cursor.fetchall()
+            cursor.nextset()
+            status = cursor.fetchval()
+        except pyodbc.ProgrammingError:
+            status = g.user['username']
+
         if status == 0:
             return
         elif status == 1:
             print("Somehow while I thought the ID wasn't null, SQL Server did!")
         elif status == 2:
-            print("Somehow even though I checked that the DM existed, SQL didn't find it!")
+            print("DM disappeared!")
+        else:
+            print("Unknown status code from get_user_info:", status)
 
         session['user_id'] = None
+        flash("Sorry, something went wrong on our end.")
         return redirect(url_for('auth.login'))
 
 
