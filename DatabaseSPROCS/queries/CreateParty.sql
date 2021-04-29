@@ -20,7 +20,8 @@ AS
 -------------------------------------------  
 -- Revision History
 -- Created 4/16/21 Nathan Hurtig
---
+-- Modified 4/29/21 Nathan Hurtig got rid of RAISERROR because
+-- it cuts of access to pyodbc's status code return
 
 -- Turn NOCOUNT on because pydobc gets confused
 SET NOCOUNT ON
@@ -30,21 +31,24 @@ SET NOCOUNT ON
 -- Is ID good?
 IF (@ID_1 is null)
 BEGIN
-  RAISERROR('ID must not be null', 10, 3)
   RETURN 1
 END
 
 IF NOT EXISTS (SELECT * FROM DM WHERE ID=@ID_1)
 BEGIN
-  RAISERROR('DM does not exist in table already', 10, 2)
   RETURN 2
 END
 
 -- Is name good?
 IF (@Name_2 is null)
 BEGIN
-  RAISERROR('Party name must not be null', 10, 1)
   RETURN 3
+END
+
+-- Is name unique to the DM?
+IF EXISTS (SELECT * FROM Party WHERE DMID = @ID_1 AND Name = @Name_2)
+BEGIN
+  RETURN 4
 END
 
 

@@ -30,9 +30,6 @@ def parties():
         elif name is None:
             print("Bad name!")
             continue
-        elif not cursor.execute("SELECT ID FROM PARTY WHERE ID = ?", party_id).fetchval():
-            print("Non-existent party!")
-            continue
 
         cursor.execute("DECLARE @Status SMALLINT "
                        "EXEC @Status = get_party_members @ID_1=? "
@@ -68,9 +65,6 @@ def create():
         error = 'Party name is required.'
     elif len(name) > 30:
         error = 'Party name too long - maximum 30 characters.'
-    elif not cursor.execute("SELECT ID FROM DM WHERE ID = ?", session.get('user_id')).fetchone():
-        print("Somehow we dropped the DM from the table mid-session?")
-        return redirect(url_for('auth.logout'))
 
     if error is None:
         cursor.execute("DECLARE @Status SMALLINT "
@@ -84,13 +78,17 @@ def create():
             return redirect(url_for('parties.parties'))
         elif status == 1:
             print("Somehow, the DMID is null? Logging out")
+            flash("Sorry, something went wrong on our end.")
             return redirect(url_for('auth.logout'))
         elif status == 2:
-            print("Safety check for nonexistent DM should have triggered earlier in party create view!")
+            print("Someone is trying to screw with our procedures!")
+            flash("Sorry, something went wrong on our end.")
             return redirect(url_for('auth.logout'))
         elif status == 3:
             print("Safety check for null party name should have triggered earlier in party create view!")
             error = 'Party name is required.'
+        elif status == 4:
+            error = 'You already have a party of that name!'
         else:
             print("Unknown error code in create_party:", status)
             error = 'Server error - try again?'
