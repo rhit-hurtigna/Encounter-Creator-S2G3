@@ -11,7 +11,7 @@
         <div>
           <h1>{{ party['name'] }}</h1>
         </div>
-          <button type="button" class="btn btn-primary" data-target="#editPartyModal" data-toggle="modal" onclick="document.getElementById('partyID').value='{{ party['id'] }}'">Edit</button>
+          <button type="button" class="btn btn-primary" data-target="#editPartyModal" data-toggle="modal" onclick="document.querySelectorAll('.partyID').forEach((element) => element.value='{{ party['id'] }}')">Edit</button>
       </header>
       <p class="body">
         {% for member in party %}
@@ -61,11 +61,35 @@
         <div class="modal-body">
             <label for="newName">Party Name</label>
             <input name="name" id="newName" maxlength="30" required>
-            <input type="number" name="partyID" id="partyID" hidden>
+            <input class="partyID" type="number" name="partyID" hidden>
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+          <button type="button" class="btn btn-danger" data-toggle="modal" data-target="#deletePartyModal" data-dismiss="modal">Delete</button>
           <input type="submit" class="btn btn-primary" value="Submit">
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="deletePartyModal" tabindex="-1" role="dialog" aria-labelledby="deletePartyModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="deletePartyModalLabel">Delete Party</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <form method="post" action="{{ url_for('parties.delete') }}">
+        <div class="modal-body">
+            Are you sure?
+            <input class="partyID" type="number" name="partyID" hidden>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+          <input type="submit" class="btn btn-danger" value="Delete">
         </div>
       </form>
     </div>

@@ -150,7 +150,54 @@ def edit():
             print("Someone is trying to edit a party they don't own!")
             error = 'Sorry, something went wrong on our end.'
         else:
-            print("Unknown error code in create_party:", status)
+            print("Unknown error code in edit_party:", status)
+            error = 'Server error - try again?'
+
+    flash(error)
+    return redirect(url_for('parties.parties'))
+
+
+@bp.route('/delete', methods=['POST'])
+@login_required
+def delete():
+    party_id = request.form['partyID']
+
+    error = None
+    cursor = get_cursor()
+
+    if party_id == "":
+        print("Was someone messing with the edit party form? Empty ID.")
+        error = 'Sorry, something went wrong on our end.'
+
+    if error is None:
+        cursor.execute("DECLARE @Status SMALLINT "
+                       "EXEC @Status = delete_party @DMID_1=?, @PartyID_2=? "
+                       "SELECT @Status AS status",
+                       session.get('user_id'), party_id)
+        status = cursor.fetchval()
+
+        if status == 0:
+            cursor.commit()
+            return redirect(url_for('parties.parties'))
+        elif status == 1:
+            print("Somehow, the DMID is null? Logging out")
+            flash("Sorry, something went wrong on our end.")
+            return redirect(url_for('auth.logout'))
+        elif status == 2:
+            print("Someone is trying to screw with our procedures! DM ID does not exist!")
+            flash("Sorry, something went wrong on our end.")
+            return redirect(url_for('auth.logout'))
+        elif status == 3:
+            print("Bad party ID!")
+            error = 'Sorry, something went wrong on our end.'
+        elif status == 4:
+            print("Nonexistent party!")
+            error = 'Sorry, something went wrong on our end.'
+        elif status == 5:
+            print("Someone is trying to delete a party they don't own!")
+            error = 'Sorry, something went wrong on our end.'
+        else:
+            print("Unknown error code in delete_party:", status)
             error = 'Server error - try again?'
 
     flash(error)
