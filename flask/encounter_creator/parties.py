@@ -204,7 +204,7 @@ def delete():
     cursor = get_cursor()
 
     if party_id == "":
-        print("Was someone messing with the edit party form? Empty ID.")
+        print("Was someone messing with the delete party form? Empty ID.")
         error = 'Sorry, something went wrong on our end.'
 
     if error is None:
@@ -374,3 +374,50 @@ def edit_member():
 
     flash(error)
     return redirect(url_for('parties.member', member_id=member_id))
+
+
+@bp.route('/deleteMember', methods=['POST'])
+@login_required
+def delete_member():
+    member_id = request.form['memberID']
+
+    error = None
+    cursor = get_cursor()
+
+    if member_id == "":
+        print("Was someone messing with the delete member form? Empty ID.")
+        error = 'Sorry, something went wrong on our end.'
+
+    if error is None:
+        cursor.execute("DECLARE @Status SMALLINT "
+                       "EXEC @Status = delete_member @DMID_1=?, @MemberID_2=? "
+                       "SELECT @Status AS status",
+                       session.get('user_id'), member_id)
+        status = cursor.fetchval()
+
+        if status == 0:
+            cursor.commit()
+            return redirect(url_for('parties.parties'))
+        elif status == 1:
+            print("Somehow, the DMID is null? Logging out")
+            flash("Sorry, something went wrong on our end.")
+            return redirect(url_for('auth.logout'))
+        elif status == 2:
+            print("Someone is trying to screw with our procedures! DM ID does not exist!")
+            flash("Sorry, something went wrong on our end.")
+            return redirect(url_for('auth.logout'))
+        elif status == 3:
+            print("Bad member ID!")
+            error = 'Sorry, something went wrong on our end.'
+        elif status == 4:
+            print("Nonexistent member!")
+            error = 'Sorry, something went wrong on our end.'
+        elif status == 5:
+            print("Someone is trying to delete a member they don't own!")
+            error = 'Sorry, something went wrong on our end.'
+        else:
+            print("Unknown error code in delete_member:", status)
+            error = 'Server error - try again?'
+
+    flash(error)
+    return redirect(url_for('parties.parties'))
