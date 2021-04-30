@@ -11,7 +11,7 @@
         <div class="card-title row">
           <h3 class="col-9">{{ party['name'] }}</h3>
           <div class="col-3">
-            <button type="button" class="btn btn-primary float-right" data-target="#editPartyModal" data-toggle="modal" onclick="document.querySelectorAll('.partyID').forEach((element) => element.value='{{ party['id'] }}')"><i class="far fa-edit"></i>&nbsp;Edit</button>
+            <button type="button" class="btn btn-primary float-right" data-target="#editPartyModal" data-toggle="modal" onclick="document.querySelectorAll('.partyID').forEach((element) => element.value='{{ party['id'] }}'); document.getElementById('newName').value = '{{ party['name'] }}'"><i class="far fa-edit"></i>&nbsp;Edit</button>
           </div>
         </div>
           <div class="list-group">
