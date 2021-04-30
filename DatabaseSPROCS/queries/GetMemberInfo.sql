@@ -8,8 +8,9 @@ AS
 --  
 -- Gets a party member's info as long
 -- as the supplied DM owns that member.
--- 2 result sets: 1 of the member's info,
--- and another of the member's actions.
+-- 2 result sets: 1 of the member's info
+-- plus the party's name
+-- and a second of the member's actions.
 --
 -- Parameters:
 -- DMID_1: ID of existing DM
@@ -43,14 +44,15 @@ IF (@MemberID_2 is null)
 IF NOT EXISTS (SELECT * FROM Member WHERE ID=@MemberID_2)
   RETURN 4
 
--- Does the DM own the member?
+
+-- Does the DM own the member? 
 IF ((SELECT DMID FROM Party WHERE ID=(SELECT PartyID FROM Member WHERE ID=@MemberID_2)) <> @DMID_1)
   RETURN 5
 
--- Select from Members table
-SELECT Name, Class, Race, Alignment, Level
-FROM Member
-WHERE ID=@MemberID_2
+-- Select from Members table, also getting party name
+SELECT Member.Name AS Name, Class, Race, Alignment, Level, Member.ID AS ID, Party.Name AS PartyName
+FROM Member JOIN Party ON Member.PartyID = Party.ID
+WHERE Member.ID=@MemberID_2
 
 -- Select from Actions table
 SELECT a.Name, a.Description

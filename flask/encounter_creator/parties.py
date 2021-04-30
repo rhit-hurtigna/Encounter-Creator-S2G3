@@ -10,6 +10,7 @@ from werkzeug.exceptions import abort
 
 from .auth import login_required
 from .db import get_cursor
+from .helpers import alignment_code_to_string
 
 bp = Blueprint('parties', __name__, url_prefix='/parties')
 
@@ -68,6 +69,7 @@ def member(member_id):
 
     try:
         member_info = cursor.fetchone()
+        long_alignment = alignment_code_to_string(member_info.Alignment, True)
         cursor.nextset()
         member_actions = cursor.fetchall()
         cursor.nextset()
@@ -76,7 +78,7 @@ def member(member_id):
         status = member_info.status
 
     if status == 0:
-        return render_template('parties/member.html', member=member_info, actions=member_actions)
+        return render_template('parties/member.html', member=member_info, alignment=long_alignment, actions=member_actions)
     elif status == 1:
         print("Somehow, the DMID is null? Logging out")
         flash("Sorry, something went wrong on our end.")
@@ -313,3 +315,62 @@ def create_member():
 
     flash(error)
     return redirect(url_for('parties.parties'))
+
+
+@bp.route('/editMember', methods=['POST'])
+@login_required
+def edit_member():
+    name = request.form['name']
+    level = int(request.form['level'])
+    race = request.form['race']
+    member_class = request.form['class']
+    alignment = request.form['alignment']
+    member_id = request.form['memberID']
+
+    error = None
+
+    if len(name) > 50:
+        error = 'Member name too long - maximum 50 characters.'
+    elif level < 1 or level > 20:
+        error = 'Level must be between 1 and 20.'
+
+    if error is None:
+        cursor = get_cursor()
+
+        cursor.execute("DECLARE @Status SMALLINT "
+                       "EXEC @Status = edit_member @DMID_1=?, @MemberID_2=?, @Name_3=?, @Class_4=?, @Race_5=?, "
+                       "@Alignment_6=?, @Level_7=? "
+                       "SELECT @Status AS status",
+                       session.get('user_id'), member_id, name, member_class, race, alignment, level)
+        status = cursor.fetchval()
+
+        if status == 0:
+            cursor.commit()
+            return redirect(url_for('parties.member', member_id=member_id))
+        elif status == 1:
+            print("Somehow, the DMID is null? Logging out")
+            flash("Sorry, something went wrong on our end.")
+            return redirect(url_for('auth.logout'))
+        elif status == 2:
+            print("Someone is trying to screw with our procedures! DM ID does not exist!")
+            flash("Sorry, something went wrong on our end.")
+            return redirect(url_for('auth.logout'))
+        elif status == 3:
+            print("Bad member ID!")
+            error = 'Sorry, something went wrong on our end.'
+        elif status == 4:
+            print("Nonexistent member!")
+            error = 'Sorry, something went wrong on our end.'
+        elif status == 5:
+            print("Someone is trying to edit a member they don't own!")
+            error = 'Sorry, something went wrong on our end.'
+        elif status == 6:
+            error = 'Invalid member alignment.'
+        elif status == '7':
+            error = 'Member level must be between 1 and 20.'
+        else:
+            print("Unknown error code from edit_member:", status)
+            error = 'Server error - try again?'
+
+    flash(error)
+    return redirect(url_for('parties.member', member_id=member_id))

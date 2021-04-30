@@ -26,7 +26,7 @@ AS
 -------------------------------------------  
 -- Demo:  
 -- DECLARE @Status SMALLINT  
--- EXEC @Status = create_party @DMID_1 = 8, @PartyID_2 = 12, @Name_3 = 'Dingledorf'.
+-- EXEC @Status = add_member @DMID_1 = 8, @PartyID_2 = 12, @Name_3 = 'Dingledorf'.
 -- @Class_4 = 'Bard', @Race_5 = 'Gnome', @Alignment_6 = 'CN', @Level_7 = 3
 -- SELECT Status = @Status  
 -------------------------------------------  
