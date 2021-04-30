@@ -74,7 +74,7 @@ def member(member_id):
         member_actions = cursor.fetchall()
         cursor.nextset()
         status = cursor.fetchval()
-    except pyodbc.ProgrammingError:
+    except (pyodbc.ProgrammingError, AttributeError):
         status = member_info.status
 
     if status == 0:
