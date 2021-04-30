@@ -14,11 +14,9 @@ from .db import get_cursor
 bp = Blueprint('parties', __name__, url_prefix='/parties')
 
 
-@bp.route('/', methods=('GET', 'POST'))
+@bp.route('/', methods=['GET'])
 @login_required
 def parties():
-    if request.method == 'POST':
-        pass
 
     parties_list = []
     cursor = get_cursor()
@@ -56,6 +54,44 @@ def parties():
             continue
 
     return render_template('parties/index.html', parties=parties_list)
+
+
+@bp.route('/member/<member_id>', methods=['GET'])
+@login_required
+def member(member_id):
+
+    cursor = get_cursor()
+
+    cursor.execute("DECLARE @Status SMALLINT "
+                   "EXEC @Status = get_member_info @DMID_1=? , @MemberID_2=? "
+                   "SELECT @Status AS status", session.get('user_id'), member_id)
+
+    try:
+        member_info = cursor.fetchone()
+        cursor.nextset()
+        member_actions = cursor.fetchall()
+        cursor.nextset()
+        status = cursor.fetchval()
+    except pyodbc.ProgrammingError:
+        status = member_info.status
+
+    if status == 0:
+        return render_template('parties/member.html', member=member_info, actions=member_actions)
+    elif status == 1:
+        print("Somehow, the DMID is null? Logging out")
+        flash("Sorry, something went wrong on our end.")
+        return redirect(url_for('auth.logout'))
+    elif status == 2:
+        print("Someone is trying to screw with our procedures!")
+        flash("Sorry, something went wrong on our end.")
+        return redirect(url_for('auth.logout'))
+    elif status == 3 or status == 4 or status == 5:
+        flash("Sorry, the requested member could not be found.")
+        return redirect(url_for('parties.parties'))
+    else:
+        print("Unknown error code for get_member_info:", status)
+        flash('Sorry, something went wrong on our end.')
+        return redirect(url_for('parties.parties'))
 
 
 @bp.route('/create', methods=['POST'])
