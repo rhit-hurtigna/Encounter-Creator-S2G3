@@ -202,3 +202,78 @@ def delete():
 
     flash(error)
     return redirect(url_for('parties.parties'))
+
+
+@bp.route('/createMember', methods=['POST'])
+@login_required
+def create_member():
+    name = request.form['name']
+    level = int(request.form['level'])
+    race = request.form['race']
+    member_class = request.form['class']
+    alignment = request.form['alignment']
+    party_id = request.form['partyID']
+
+    error = None
+
+    if not name:
+        error = 'Member name is required.'
+    elif len(name) > 50:
+        error = 'Member name too long - maximum 50 characters.'
+    elif level < 1 or level > 20:
+        error = 'Level must be between 1 and 20.'
+    elif not race:
+        error = 'Race is required.'
+    elif not member_class:
+        error = 'Class is required.'
+    elif not alignment:
+        error = 'Alignment is required.'
+
+    if error is None:
+        cursor = get_cursor()
+
+        cursor.execute("DECLARE @Status SMALLINT "
+                       "EXEC @Status = add_member @DMID_1=?, @PartyID_2=?, @Name_3=?, @Class_4=?, @Race_5=?, "
+                       "@Alignment_6=?, @Level_7=? "
+                       "SELECT @Status AS status",
+                       session.get('user_id'), party_id, name, member_class, race, alignment, level)
+        status = cursor.fetchval()
+
+        if status == 0:
+            cursor.commit()
+            return redirect(url_for('parties.parties'))
+        elif status == 1:
+            print("Somehow, the DMID is null? Logging out")
+            flash("Sorry, something went wrong on our end.")
+            return redirect(url_for('auth.logout'))
+        elif status == 2:
+            print("Someone is trying to screw with our procedures! DM ID does not exist!")
+            flash("Sorry, something went wrong on our end.")
+            return redirect(url_for('auth.logout'))
+        elif status == 3:
+            print("Bad party ID!")
+            error = 'Sorry, something went wrong on our end.'
+        elif status == 4:
+            print("Nonexistent party!")
+            error = 'Sorry, something went wrong on our end.'
+        elif status == 5:
+            print("Someone is trying to edit a party they don't own!")
+            error = 'Sorry, something went wrong on our end.'
+        elif status == 6:
+            error = 'Member name is required.'
+        elif status == 7:
+            error = 'Member class is required.'
+        elif status == 8:
+            error = 'Member race is required.'
+        elif status == 9 or status == 10:
+            error = 'Invalid member alignment.'
+        elif status == '11':
+            error = 'Member level is required.'
+        elif status == '12':
+            error = 'Member level must be between 1 and 20.'
+        else:
+            print("Unknown error code from add_member:", status)
+            error = 'Server error - try again?'
+
+    flash(error)
+    return redirect(url_for('parties.parties'))
