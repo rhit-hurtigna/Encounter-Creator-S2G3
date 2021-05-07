@@ -5,8 +5,8 @@ CREATE PROCEDURE get_actions
 AS
 
 --  
--- Gets 100 actions, starting with the
--- (Page_1 - 1) * 100 th action. Ordered
+-- Gets 30 actions, starting with the
+-- (Page_1 - 1) * 30 th action. Ordered
 -- by action name.
 --
 -- Parameters:
@@ -14,7 +14,7 @@ AS
 --
 -- Selects:
 -- Rows containing action names, descriptions
--- Then boolean as to whether there are more pages
+-- Then the max page number
 -------------------------------------------  
 -- Demo:  
 -- DECLARE @Status SMALLINT
@@ -30,7 +30,7 @@ SET NOCOUNT ON
 -- Check that parameters are good  
 
 -- Is ID good?
-IF (@Page_1 is null)
+IF (@Page_1 is null OR @Page_1 < 1)
 BEGIN
   RETURN 1
 END
@@ -38,7 +38,7 @@ END
 -- Check if page would have anything
 DECLARE @Count int
 SELECT @Count = COUNT(ID) FROM Action
-IF (@Count < (100 * (@Page_1 - 1)) + 1)
+IF (@Count < (30 * (@Page_1 - 1)) + 1)
 BEGIN
   RETURN 2
 END
@@ -48,12 +48,9 @@ END
 SELECT Name, Description
 FROM Action
 ORDER BY Name
-OFFSET (100 * (@Page_1 - 1)) ROWS FETCH NEXT 100 ROWS ONLY
+OFFSET (30 * (@Page_1 - 1)) ROWS FETCH NEXT 30 ROWS ONLY
 
--- Select whether there should be a next page
-IF(@Count < (100 * (@Page_1)) + 1)
-  SELECT 0
-ELSE
-  SELECT 1
+-- Select max page num
+SELECT CEILING(@Count / 30.0)
 
 RETURN 0

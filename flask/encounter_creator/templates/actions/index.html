@@ -3,6 +3,8 @@
 {% block header %}
   <h1>{% block title %}Parties{% endblock %}</h1>
   <button type="button" class="btn btn-primary" data-target="#createActionModal" data-toggle="modal"><i class="far fa-plus-square"></i>&nbsp;New Action</button>
+  <a type="button" class="btn btn-primary {% if pageNum < 2 %}disabled{% endif %}" href="{{ url_for('actions.actions', page_num=(pageNum - 1)) }}">Previous</a>
+  <a type="button" class="btn btn-primary {% if pageNum >= maxPage %}disabled{% endif %}" href="{{ url_for('actions.actions', page_num=(pageNum + 1)) }}">Next</a>
 {% endblock %}
 {% block content %}
   {% for action in actions %}
@@ -15,6 +17,10 @@
       </div>
     </div>
   {% endfor %}
+<div class="d-flex justify-content-end">
+  <a type="button" class="btn btn-primary {% if pageNum < 2 %}disabled{% endif %} m-1" href="{{ url_for('actions.actions', page_num=(pageNum - 1)) }}">Previous</a>
+  <a type="button" class="btn btn-primary {% if pageNum >= maxPage %}disabled{% endif %} m-1" href="{{ url_for('actions.actions', page_num=(pageNum + 1)) }}">Next</a>
+</div>
 
 <div class="modal fade" id="createActionModal" tabindex="-1" role="dialog" aria-labelledby="createActionModalLabel" aria-hidden="true">
   <div class="modal-dialog" role="document">

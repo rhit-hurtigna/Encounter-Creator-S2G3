@@ -10,7 +10,7 @@ def create_app(test_config=None):
     # create and configure the app
     app = Flask(__name__, instance_relative_config=True)
     app.config.from_mapping(
-        SECRET_KEY='dev',
+        SECRET_KEY='1$Zl4miLxi!BSgguvR4kcHD2*KTtdI%OpE$QuBFpNlj#',
         DATABASE=os.path.join(app.instance_path, 'encounter_creator.sqlite'),
     )
 
