@@ -34,7 +34,7 @@
           <div class="form-group">
             <label for="actionName">Action Name</label>
             <input class="form-control" id="actionName" name="name" maxlength="50" required aria-describedby="actionNameHelp">
-            <small id="actionNameHelp" class="form-text text-muted">Enter the action's name here. Use the <a href="{{ url_for('actions.actions') }}">action catalog</a> to find one.</small>
+            <small id="actionNameHelp" class="form-text text-muted">Enter the action's name here. Use the <a href="{{ url_for('actions.actions', page_num=1) }}">action catalog</a> to find one.</small>
           </div>
           <input type="number" name="memberID" value="{{ member.ID }}" hidden>
         </div>
