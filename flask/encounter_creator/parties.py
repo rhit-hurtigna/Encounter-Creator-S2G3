@@ -426,4 +426,56 @@ def delete_member():
 @bp.route('/addAction', methods=['POST'])
 @login_required
 def add_action():
-    pass
+    name = request.form['name']
+    member_id = request.form['memberID']
+    error = None
+    cursor = get_cursor()
+
+    if not name:
+        error = 'Action name is required.'
+    elif len(name) > 50:
+        error = 'Action name too long - maximum 50 characters.'
+    elif not member_id:
+        print("Somehow, member_id went bad for add action!")
+        flash("Sorry, something went wrong on our end.")
+        return redirect(url_for('parties.parties'))
+
+    if error is None:
+        cursor.execute("DECLARE @Status SMALLINT "
+                       "EXEC @Status = add_action @DMID_1=?, @MemberID_2=?, @Name_3=? "
+                       "SELECT @Status AS status",
+                       session.get('user_id'), member_id, name)
+        status = cursor.fetchval()
+
+        if status == 0:
+            cursor.commit()
+            return redirect(url_for('parties.member', member_id=member_id))
+        elif status == 1:
+            print("Somehow, DMID is null? Exiting...")
+            flash("Sorry, something went wrong on our end.")
+            return redirect(url_for('auth.logout'))
+        elif status == 2:
+            print("Somehow, DM doesn't exist? Logging out.")
+            flash("Sorry, something went wrong on our end.")
+            return redirect(url_for('auth.logout'))
+        elif status == 3:
+            print("Safety check for bad member ID should have triggered earlier in add action view!")
+            error = "Sorry, something went wrong on our end."
+        elif status == 4:
+            error = "Sorry, something went wrong on our end."
+        elif status == 5:
+            print("Someone is trying to mess with the add action procedure!")
+            error = "Sorry, something went wrong on our end."
+        elif status == 6:
+            print("Safety check for bad name should have triggered earlier in create action view!")
+            error = "Sorry, something went wrong on our end."
+        elif status == 7:
+            error = "Sorry, that action doesn't exist. You can create it in the actions catalog."
+        elif status == 8:
+            return redirect(url_for('parties.member', member_id=member_id))
+        else:
+            print("Unknown error code in add_action:", status)
+            error = 'Server error - try again?'
+
+    flash(error)
+    return redirect(url_for('parties.member', member_id=member_id))

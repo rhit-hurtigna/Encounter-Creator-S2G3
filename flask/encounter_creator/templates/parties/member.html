@@ -11,12 +11,38 @@
       <h3 class="card-title">{{ member.Name }}</h3>
       <h6 class="card-subtitle mb-2 text-muted">The Level {{ member.Level }} {{ alignment }} {{ member.Race }} {{ member.Class }}</h6>
     </div>
-    <div class="list-group">
-      {% for action in member.Actions %}
-        <button class="list-group-item list-group-item-action">{{ action.Name }}</button>
+<!--    <div class="list-group">-->
+<!--      {% for action in actions %}-->
+<!--        <button class="list-group-item list-group-item-action">{{ action.Name }}</button>-->
+<!--      {% endfor %}-->
+<!--      <button data-toggle="modal" data-target="#addActionModal" class="list-group-item list-group-item-action"><i class="far fa-plus-square"></i>&nbsp;Add an Action</button>-->
+<!--    </div>-->
+    <div id="accordion">
+      {% for action in actions %}
+      <div class="card my-0">
+        <div class="card-header" id="heading{{ action.ID }}">
+          <h5 class="mb-0">
+            <button class="btn btn-link" data-toggle="collapse" data-target="#collapse{{ action.ID }}" aria-expanded="true" aria-controls="collapse{{ action.ID }}">
+              {{ action.Name }}
+            </button>
+          </h5>
+        </div>
+        <div id="collapse{{ action.ID }}" class="collapse" aria-labelledby="heading{{ action.ID }}" data-parent="#accordion">
+          <div class="card-body">
+            {{ action.Description }}
+          </div>
+        </div>
+      </div>
       {% endfor %}
-      <button data-toggle="modal" data-target="#addActionModal" class="list-group-item list-group-item-action"><i class="far fa-plus-square"></i>&nbsp;Add an Action</button>
-    </div>
+      <div class="card my-0">
+        <div class="card-header">
+          <h5 class="mb-0">
+            <button class="btn btn-link" data-toggle="modal" data-target="#addActionModal" class="list-group-item list-group-item-action">
+              <i class="far fa-plus-square"></i>&nbsp;Add an Action
+            </button>
+          </h5>
+        </div>
+      </div>
     </div>
   </div>
 

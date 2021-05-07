@@ -1,7 +1,6 @@
 USE [EncounterCreatorS2G3]
 GO
 
-/****** Object:  StoredProcedure [dbo].[create_action]    Script Date: 05/06/21 9:16:42 PM ******/
 SET ANSI_NULLS ON
 GO
 
@@ -9,9 +8,9 @@ SET QUOTED_IDENTIFIER ON
 GO
 
 -- =============================================
--- Author:		<Author,,Name>
--- Create date: <Create Date,,>
--- Description:	<Description,,>
+-- Author:		<???>
+-- Create date: <???>
+-- Description:	<???>
 -- =============================================
 -- =============================================
 -- Modified:		Nathan Hurtig
@@ -45,5 +44,3 @@ Insert into Action(Name, Description)
 Values(@Name, @Description)
 END
 GO
-
-
