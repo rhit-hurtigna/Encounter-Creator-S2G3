@@ -421,3 +421,9 @@ def delete_member():
 
     flash(error)
     return redirect(url_for('parties.parties'))
+
+
+@bp.route('/addAction', methods=['POST'])
+@login_required
+def add_action():
+    pass

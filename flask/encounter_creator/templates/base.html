@@ -22,7 +22,7 @@
     <li><a class="action" href="{{ url_for('main.index') }}">Home</a></li>
     <li><a class="action" href="{{ url_for('parties.parties') }}">Manage Parties</a></li>
     <li><a class="action" href="{{ url_for('monsters.monsters') }}">View Monsters</a></li>
-    <li><a class="action" href="{{ url_for('main.settings') }}">Settings</a></li>
+    <li><a class="action" href="{{ url_for('actions.actions') }}">View Actions</a></li>
     <li><a href="{{ url_for('auth.logout') }}">Log Out</a></li>
     {% else %}
     <li><a href="{{ url_for('auth.register') }}">Register</a></li>

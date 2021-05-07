@@ -1,7 +1,7 @@
 import os
 
 from flask import Flask
-from . import db, auth, main, parties, monsters
+from . import db, auth, main, parties, monsters, actions
 
 
 # From https://flask.palletsprojects.com/en/1.1.x/tutorial/factory/
@@ -32,5 +32,6 @@ def create_app(test_config=None):
     app.register_blueprint(main.bp)
     app.register_blueprint(parties.bp)
     app.register_blueprint(monsters.bp)
+    app.register_blueprint(actions.bp)
     app.add_url_rule('/', endpoint='index')
     return app
