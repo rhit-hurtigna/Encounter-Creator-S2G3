@@ -96,26 +96,25 @@
   </div>
 </div>
 
-<div class="modal fade" id="createMemberModal" tabindex="-1" role="dialog" aria-labelledby="createMemberModalLabel" aria-hidden="true">
+<div class="modal fade" id="editMemberModal" tabindex="-1" role="dialog" aria-labelledby="createMemberModalLabel" aria-hidden="true">
   <div class="modal-dialog" role="document">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="createMemberModalLabel">Add a Member</h5>
+        <h5 class="modal-title" id="createMemberModalLabel">Edit {{ member.Name }}</h5>
         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
           <span aria-hidden="true">&times;</span>
         </button>
       </div>
-      <form method="post" action="{{ url_for('parties.create_member') }}">
+      <form method="post" action="{{ url_for('parties.edit_member') }}">
         <div class="modal-body">
           <div class="form-group">
             <label for="memberName">Name</label>
-            <input class="form-control" id="memberName" name="name" maxlength="50" required aria-describedby="memberNameHelp">
-            <small id="memberNameHelp" class="form-text text-muted">Enter the member's name here.</small>
+            <input value="{{ member.Name }}" class="form-control" id="memberName" name="name" maxlength="50" required aria-describedby="memberNameHelp">
+            <small id="memberNameHelp" class="form-text text-muted">Enter the member's new name here.</small>
           </div>
           <div class="form-group">
             <label for="class">Class</label>
             <select class="form-control" id="class" name="class" required aria-describedby="classHelp">
-              <option value="" selected disabled>--</option>
               <option>Barbarian</option>
               <option>Bard</option>
               <option>Cleric</option>
@@ -129,17 +128,16 @@
               <option>Warlock</option>
               <option>Wizard</option>
             </select>
-            <small id="classHelp" class="form-text text-muted">Enter the member's class here.</small>
+            <small id="classHelp" class="form-text text-muted">Enter the member's new class here.</small>
           </div>
           <div class="form-group">
             <label for="level">Level</label>
-            <input type="number" class="form-control" id="level" name="level" min="1" max="20" value="1" required aria-describedby="levelHelp">
-            <small id="levelHelp" class="form-text text-muted">Enter the member's level here.</small>
+            <input value={{ member.Level }} type="number" class="form-control" id="level" name="level" min="1" max="20" value="1" required aria-describedby="levelHelp">
+            <small id="levelHelp" class="form-text text-muted">Enter the member's new level here.</small>
           </div>
           <div class="form-group">
             <label for="race">Race</label>
             <select class="form-control" id="race" name="race" required aria-describedby="raceHelp">
-              <option value="" selected disabled>--</option>
               <option>Dragonborn</option>
               <option>Dwarf</option>
               <option>Elf</option>
@@ -150,12 +148,11 @@
               <option>Human</option>
               <option>Tiefling</option>
             </select>
-            <small id="raceHelp" class="form-text text-muted">Enter the member's race here.</small>
+            <small id="raceHelp" class="form-text text-muted">Enter the member's new race here.</small>
           </div>
           <div class="form-group">
             <label for="alignment">Alignment</label>
             <select class="form-control" id="alignment" name="alignment" required aria-describedby="alignmentHelp">
-              <option value="" selected disabled>--</option>
               <option value="LG">Lawful Good</option>
               <option value="NG">Neutral Good</option>
               <option value="CG">Chaotic Good</option>
@@ -166,13 +163,14 @@
               <option value="NE">Neutral Evil</option>
               <option value="CE">Chaotic Evil</option>
             </select>
-            <small id="alignmentHelp" class="form-text text-muted">Enter the member's alignment here.</small>
+            <small id="alignmentHelp" class="form-text text-muted">Enter the member's new alignment here.</small>
           </div>
-          <input class="partyID" type="number" name="partyID" hidden>
+          <input type="number" name="memberID" value="{{ member.ID }}" hidden>
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-          <button type="submit" class="btn btn-primary">Create New Member</button>
+          <button type="button" class="btn btn-danger" data-toggle="modal" data-target="#deleteMemberModal" data-dismiss="modal"><i class="far fa-trash-alt"></i>&nbsp;Delete</button>
+          <button type="submit" class="btn btn-primary">Submit</button>
         </div>
       </form>
     </div>
