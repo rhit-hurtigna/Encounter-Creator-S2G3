@@ -1,0 +1,39 @@
+-- =============================================  
+-- Author:  <Author,,Name>  
+-- Create date: <Create Date,,>  
+-- Description: <Description,,>  
+-- =============================================  
+CREATE PROCEDURE [dbo].[create_action]  
+ -- Add the parameters for the stored procedure here  
+ @Name varchar(50),  
+ @Description varchar(200)  
+AS  
+BEGIN  
+ -- SET NOCOUNT ON added to prevent extra result sets from  
+ -- interfering with SELECT statements.  
+IF (@Name is null)  
+BEGIN  
+  RAISERROR('Name must not be null', 10, 3)  
+  RETURN 1  
+END  
+  
+IF NOT EXISTS (SELECT count(*) FROM Action WHERE Name = @Name)  
+BEGIN  
+  RAISERROR('Action name already exists', 10, 2)  
+  RETURN 2  
+END  
+  
+IF NOT EXISTS (SELECT count(*) FROM Action WHERE Description = @Description)  
+BEGIN  
+  RAISERROR('Description already exists!', 10, 2)  
+  RETURN 3  
+END  
+  
+  
+  
+ SET NOCOUNT ON;  
+  
+    -- Insert statements for procedure here  
+ Insert into Action(Name, Description)  
+ Values(@Name, @Description)  
+END  
