@@ -34,6 +34,7 @@ def actions(page_num):
     except pyodbc.ProgrammingError:
         status = actions_list[0][0]
     if status == 0:
+        print(actions_list)
         return render_template('actions/index.html', actions=actions_list, hasNext=has_next)
     elif status == 1 or status == 2:
         pass
@@ -41,3 +42,9 @@ def actions(page_num):
         print("Unknown error code for get_party_members:", status)
 
     return redirect(url_for('parties.parties'))
+
+
+@login_required
+@bp.route('/create', methods=['POST'])
+def create():
+    pass
