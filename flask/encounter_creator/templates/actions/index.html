@@ -1,7 +1,11 @@
 {% extends 'base.html' %}
 
 {% block header %}
-  <h1>{% block title %}Parties{% endblock %}</h1>
+  <h1>{% block title %}Actions Catalog{% endblock %}</h1>
+  <form class="form-inline m-auto" action="{{ url_for('actions.search') }}" method="GET">
+    <input class="form-control ml-1" type="search" name="search" placeholder="Search" aria-label="Search" minlength="3" maxlength="50">
+    <button class="btn btn-outline-success mr-1" type="submit"><i class="fas fa-search"></i></button>
+  </form>
   <button type="button" class="btn btn-primary" data-target="#createActionModal" data-toggle="modal"><i class="far fa-plus-square"></i>&nbsp;New Action</button>
   <a type="button" class="btn btn-primary {% if pageNum < 2 %}disabled{% endif %}" href="{{ url_for('actions.actions', page_num=(pageNum - 1)) }}">Previous</a>
   <a type="button" class="btn btn-primary {% if pageNum >= maxPage %}disabled{% endif %}" href="{{ url_for('actions.actions', page_num=(pageNum + 1)) }}">Next</a>

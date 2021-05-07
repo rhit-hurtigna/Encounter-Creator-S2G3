@@ -34,13 +34,47 @@ def actions(page_num):
     except pyodbc.ProgrammingError:
         status = actions_list[0][0]
     if status == 0:
-        print(actions_list)
         return render_template('actions/index.html', actions=actions_list, pageNum=page_num, maxPage=max_page)
     elif status == 1 or status == 2:
         pass
     else:
-        print("Unknown error code for get_party_members:", status)
+        print("Unknown error code for get_actions:", status)
 
+    flash("Sorry, something went wrong on our end.")
+    return redirect(url_for('actions.actions', page_num=1))
+
+
+@bp.route('search/', methods=['GET'])
+def search():
+
+    actions_list = []
+    cursor = get_cursor()
+    query = request.args.get('search', '')
+    if len(query) < 3:
+        flash("Sorry, you must search by at least 3 characters.")
+        return redirect(url_for('actions.actions', page_num=1))
+    elif len(query) > 50:
+        flash("Sorry, you must search by at less than 50 characters.")
+        return redirect(url_for('actions.actions', page_num=1))
+
+    cursor.execute("DECLARE @Status SMALLINT "
+                   "EXEC @Status = search_actions @Search_1=? "
+                   "SELECT @Status AS status", query)
+
+    try:
+        actions_list = cursor.fetchall()
+        cursor.nextset()
+        status = cursor.fetchval()
+    except pyodbc.ProgrammingError:
+        status = actions_list[0][0]
+    if status == 0:
+        return render_template('actions/index.html', actions=actions_list, pageNum=1, maxPage=1)
+    elif status == 1:
+        print("Check for bad query should have triggered earlier in action search!")
+    else:
+        print("Unknown error code for search_actions:", status)
+
+    flash("Sorry, something went wrong on our end.")
     return redirect(url_for('actions.actions', page_num=1))
 
 
