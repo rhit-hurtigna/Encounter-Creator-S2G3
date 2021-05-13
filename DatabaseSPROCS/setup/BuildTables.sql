@@ -96,7 +96,6 @@ IF NOT EXISTS (Select * From sys.tables Where name = 'Type') Create Table Type
 (
 	ID int IDENTITY(1,1),
 	Name varchar(50) NOT NULL,
-	Description varchar(500),
 	PRIMARY KEY (ID)
 )
 
@@ -119,7 +118,6 @@ IF NOT EXISTS (SELECT * FROM sys.tables WHERE name='Action') CREATE TABLE Action
 (
 	ID int IDENTITY(1,1),
 	Name varchar(50) NOT NULL,
-	Description varchar(200),
 	PRIMARY KEY (ID),
 	UNIQUE (Name)
 )
