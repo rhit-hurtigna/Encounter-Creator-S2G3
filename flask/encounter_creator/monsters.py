@@ -17,17 +17,17 @@ bp = Blueprint('monsters', __name__, url_prefix='/monsters')
 @bp.route('/', methods=['GET'])
 def monsters():
     cursor = get_cursor()
-    
+
     cursor.execute("DECLARE @status SMALLINT EXEC @status = get_monster_info @DMID = ? SELECT @status AS status",
                    session.get('user_id'))
-   
+
     try:
         monsters_list = cursor.fetchall()
         status = cursor.fetchval()
     except pyodbc.ProgrammingError:
         status = 1
         print('hi, bad things happened')
-        
+
     return render_template('monsters/index.html', monsters=monsters_list)
 
 
@@ -43,8 +43,7 @@ def create():
     error = None
     cursor = get_cursor()
 
-    
-    args = [name,cr]
+    args = [name, cr]
     query_str = 'DECLARE @status SMALLINT EXEC @status = create_monster @monst_name= ?, @CR= ?,'
 
     if type_name != '':
@@ -89,20 +88,20 @@ def create():
     return redirect(url_for('monsters.create'))
 
 
-@bp.route('/search', methods=['GET','POST'])
+@bp.route('/search', methods=['GET', 'POST'])
 @login_required
 def search():
     query = request.args['search']
     if query == None or query == '':
         return redirect(url_for('monsters.monsters'))
-    return redirect(url_for('monsters.searchView',name=query))
+    return redirect(url_for('monsters.searchView', name=query))
 
 
-@bp.route('/search/<name>', methods=['GET','POST'])
+@bp.route('/search/<name>', methods=['GET', 'POST'])
 def searchView(name):
     cursor = get_cursor()
-    
-    cursor.execute("DECLARE @status SMALLINT EXEC @status = get_monster_info @name = ? SELECT @status AS status",name)
+
+    cursor.execute("DECLARE @status SMALLINT EXEC @status = get_monster_info @name = ? SELECT @status AS status", name)
     print(name)
     try:
         monsters_list = cursor.fetchall()
@@ -110,7 +109,7 @@ def searchView(name):
     except pyodbc.ProgrammingError:
         status = 1
         print('hi, bad things happened')
-        
+
     return render_template('monsters/index.html', monsters=monsters_list)
 
 
@@ -122,8 +121,8 @@ def delete():
     cursor = get_cursor()
 
     cursor.execute("DECLARE @status SMALLINT "
-                    "EXEC @status = delete_monster @monst_name = ? "
-                    "SELECT @status AS status", name)
+                   "EXEC @status = delete_monster @monst_name = ? "
+                   "SELECT @status AS status", name)
     status = cursor.fetchval()
 
     if status == 0:
@@ -169,8 +168,8 @@ def edit():
         query_str = query_str + '@CR = ?,'
 
     if type_name != '':
-            args.append(type_name)
-            query_str = query_str + '@type_name = ?,'
+        args.append(type_name)
+        query_str = query_str + '@type_name = ?,'
 
     if book_name != '':
         args.append(book_name)
@@ -179,16 +178,46 @@ def edit():
     if alignment != '':
         args.append(alignment)
         query_str = query_str + '@align = ?,'
-    
+
     query_str = query_str[:-1]
     query_str = query_str + ' SELECT @status AS status'
     print(query_str)
-    cursor.execute(query_str,args)
+    cursor.execute(query_str, args)
     status = cursor.fetchval()
 
     # TODO: add error checking
     cursor.commit()
     return redirect(url_for('monsters.monsters'))
 
+    flash(error)
+    return redirect(url_for('monsters.monsters'))
+
+
+@bp.route('/toggle', methods=['POST'])
+@login_required
+def toggle_liked():
+    cursor = get_cursor()
+    monster_id = request.form.get('monster_id', None)
+    error = None
+    if not monster_id or monster_id < 0:
+        error = 'Sorry, something went wrong on our end.'
+
+    if error is not None:
+        cursor.execute("DECLARE @Status SMALLINT "
+                       "EXEC toggle_monster_liked @DMID_1=?, @MonsterID_2=? "
+                       "SELECT @Status AS status", session.get('user_id'), monster_id)
+        status = cursor.fetchval()
+        if status == 0:
+            cursor.commit()
+            return redirect(url_for('monsters.monsters'))
+        elif status == 1:
+            print("Somehow, DMID is bad! Logging out.")
+            flash("Sorry, something went wrong on our end.")
+            return redirect(url_for('auth.logout'))
+        elif status == 2:
+            error = "Sorry, something went wrong on our end."
+        else:
+            print("Unrecognized return code for toggle_monster_liked:", status)
+            error = "Sorry, something went wrong on our end."
     flash(error)
     return redirect(url_for('monsters.monsters'))
