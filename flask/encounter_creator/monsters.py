@@ -2,8 +2,9 @@
 Jackson Hajer - 5/6/21
 from https://flask.palletsprojects.com/en/1.1.x/tutorial/blog/
 """
+import pyodbc
 from flask import (
-    Blueprint, flash, g, redirect, render_template, request, url_for
+    Blueprint, flash, g, redirect, render_template, request, url_for, session
 )
 from werkzeug.exceptions import abort
 
@@ -13,11 +14,12 @@ from .db import get_cursor
 bp = Blueprint('monsters', __name__, url_prefix='/monsters')
 
 
-@bp.route('/',methods=['GET'])
+@bp.route('/', methods=['GET'])
 def monsters():
     cursor = get_cursor()
     
-    cursor.execute("DECLARE @status SMALLINT EXEC @status = get_monster_info SELECT @status AS status")
+    cursor.execute("DECLARE @status SMALLINT EXEC @status = get_monster_info @DMID = ? SELECT @status AS status",
+                   session.get('user_id'))
    
     try:
         monsters_list = cursor.fetchall()
@@ -95,6 +97,7 @@ def search():
         return redirect(url_for('monsters.monsters'))
     return redirect(url_for('monsters.searchView',name=query))
 
+
 @bp.route('/search/<name>', methods=['GET','POST'])
 def searchView(name):
     cursor = get_cursor()
@@ -141,6 +144,7 @@ def delete():
     flash(error)
     return redirect(url_for('monsters.delete'))
 
+
 @bp.route('/edit', methods=['POST'])
 def edit():
     name = request.form['name']
@@ -185,7 +189,6 @@ def edit():
     # TODO: add error checking
     cursor.commit()
     return redirect(url_for('monsters.monsters'))
-    
 
     flash(error)
     return redirect(url_for('monsters.monsters'))

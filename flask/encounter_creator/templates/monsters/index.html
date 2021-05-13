@@ -25,17 +25,18 @@
 					<th>Type</th>
 					<th>Book</th>
 					<th>Alignment</th>
+                    <th>Liked</th>
 				</tr>
 			</thead>    
 			<tbody>
 			 {% for monster in monsters %}    
 					<tr>
-						<td width='287px'>{{monster.Name}}</td>
-						<td width='59px'>{{monster.CR}}</td>
-						<td width='305px'>{{monster.TypeName}}</td>
-						<td width='204px'>{{monster.BookName}}</td>
-						<td width='82px'>{{monster.Alignment}}</td>
-						
+						<td>{{monster.Name}}</td>
+						<td>{{monster.CR}}</td>
+						<td>{{monster.TypeName}}</td>
+						<td>{{monster.BookName}}</td>
+						<td>{{monster.Alignment}}</td>
+						<td><a href="{{ url_for('monsters.toggle_liked', id=monster.ID) }}"{% if monster.Liked %}<i class="fas fa-star"></i>{% else %}<i class="far fa-star"></i>{% endif %}</td>
 					</tr>
 				{% endfor %}
 			</tbody>
