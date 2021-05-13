@@ -36,8 +36,8 @@ END
 DECLARE @query varchar(100)
 SET @query = '"' + @Search_1 + '*"'
 -- Get values
-SELECT TOP 30 Name, Description
+SELECT TOP 30 Name
 FROM Action
-WHERE CONTAINS((Name, Description), @query)
+WHERE CONTAINS((Name), @query)
 
 RETURN 0
