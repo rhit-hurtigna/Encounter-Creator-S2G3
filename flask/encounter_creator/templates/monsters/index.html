@@ -37,9 +37,7 @@
 						<td>{{monster.BookName}}</td>
 						<td>{{monster.Alignment}}</td>
 						<td>
-                            <form action="{{ url_for('monsters.toggle_liked', monster_id=monster.ID) }}" method="POST">
-                                <button class="btn" type="submit">{% if monster.Liked %}<i class="fas fa-star"></i>{% else %}<i class="far fa-star"></i>{% endif %}</button>
-                            </form>
+                            <a href="{{ url_for('monsters.toggle_liked', monster_id=monster.ID) }}">{% if monster.Liked %}<i class="fas fa-star"></i>{% else %}<i class="far fa-star"></i>{% endif %}</a>
                         </td>
 					</tr>
 				{% endfor %}

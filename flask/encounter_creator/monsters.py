@@ -193,28 +193,29 @@ def edit():
     return redirect(url_for('monsters.monsters'))
 
 
-@bp.route('/toggle', methods=['POST'])
+@bp.route('/toggle', methods=['GET'])
 @login_required
 def toggle_liked():
     cursor = get_cursor()
-    monster_id = request.form.get('monster_id', None)
+    monster_id = int(request.args.get('monster_id'))
     error = None
-    if not monster_id or monster_id < 0:
+    if monster_id is None or monster_id < 0:
         error = 'Sorry, something went wrong on our end.'
-
-    if error is not None:
+    if error is None:
+        print("Executing monsterID", monster_id)
         cursor.execute("DECLARE @Status SMALLINT "
-                       "EXEC toggle_monster_liked @DMID_1=?, @MonsterID_2=? "
+                       "EXEC @Status = toggle_monster_liked @DMID_1=?, @MonsterID_2=? "
                        "SELECT @Status AS status", session.get('user_id'), monster_id)
         status = cursor.fetchval()
         if status == 0:
             cursor.commit()
             return redirect(url_for('monsters.monsters'))
-        elif status == 1:
+        elif status == 1 or status == 2:
             print("Somehow, DMID is bad! Logging out.")
             flash("Sorry, something went wrong on our end.")
             return redirect(url_for('auth.logout'))
-        elif status == 2:
+        elif status == 3 or status == 4:
+            print("Something is wrong with the like monster form!")
             error = "Sorry, something went wrong on our end."
         else:
             print("Unrecognized return code for toggle_monster_liked:", status)
