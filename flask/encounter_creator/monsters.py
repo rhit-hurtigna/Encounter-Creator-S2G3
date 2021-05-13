@@ -92,7 +92,7 @@ def create():
 @login_required
 def search():
     query = request.args['search']
-    if query == None or query == '':
+    if query is None or query == '':
         return redirect(url_for('monsters.monsters'))
     return redirect(url_for('monsters.searchView', name=query))
 
@@ -101,10 +101,10 @@ def search():
 def searchView(name):
     cursor = get_cursor()
 
-    cursor.execute("DECLARE @status SMALLINT EXEC @status = get_monster_info @name = ? SELECT @status AS status", name)
-    print(name)
+    cursor.execute("DECLARE @status SMALLINT EXEC @status = get_monster_info @name=?, @DMID=? SELECT @status AS status", name, session['user_id'])
     try:
         monsters_list = cursor.fetchall()
+        print(monsters_list)
         status = cursor.fetchval()
     except pyodbc.ProgrammingError:
         status = 1
@@ -202,7 +202,6 @@ def toggle_liked():
     if monster_id is None or monster_id < 0:
         error = 'Sorry, something went wrong on our end.'
     if error is None:
-        print("Executing monsterID", monster_id)
         cursor.execute("DECLARE @Status SMALLINT "
                        "EXEC @Status = toggle_monster_liked @DMID_1=?, @MonsterID_2=? "
                        "SELECT @Status AS status", session.get('user_id'), monster_id)
