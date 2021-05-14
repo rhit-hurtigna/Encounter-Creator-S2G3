@@ -9,6 +9,7 @@
 {% block content %}
 	<form action="{{url_for('monsters.search')}}">
 		<input class="form-control" name="search" placeholder="Search..." autocomplete="off" autofocus="autofocus" type="text">
+    <button type="button" class="btn btn-primary" data-target="#advSearchMonsterModal" data-toggle="modal"><i class="far fa-plus-square"></i>&nbsp;Advanced Search</button>
 		</form>
 	<div>
 		<style>
@@ -25,17 +26,18 @@
 					<th>Type</th>
 					<th>Book</th>
 					<th>Alignment</th>
+          <th>More Info</th>
 				</tr>
 			</thead>    
 			<tbody>
 			 {% for monster in monsters %}    
 					<tr>
-						<td width='287px'>{{monster.Name}}</td>
-						<td width='59px'>{{monster.CR}}</td>
-						<td width='305px'>{{monster.TypeName}}</td>
-						<td width='204px'>{{monster.BookName}}</td>
-						<td width='82px'>{{monster.Alignment}}</td>
-						
+						<td>{{monster.Name}}</td>
+						<td>{{monster.CR}}</td>
+						<td>{{monster.TypeName}}</td>
+						<td>{{monster.BookName}}</td>
+						<td>{{monster.Alignment}}</td>
+						<td><a href="{{ url_for('monsters.info', name = monster.Name)}}">More Info</a></td>
 					</tr>
 				{% endfor %}
 			</tbody>
@@ -151,6 +153,42 @@
               <option>CE</option>
             </select>
 			<small id="alignmentHelp" class="form-text text-muted">Enter the monster's new alignment here.</small>
+            </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-primary">Submit</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="advSearchMonsterModal" tabindex="-1" role="dialog" aria-labelledby="advSearchMonsterModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="advSearchMonsterModalLabel">Advanced Search</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <form method="post" action="{{ url_for('monsters.advanced') }}">
+        <div class="modal-body">
+            <div class="form-group">
+              <label for="name">Type</label>
+              <input class="form-control" id="name" name="name" maxlength="50" required aria-describedby="nameHelp">
+              <small id="nameHelp" class="form-text text-muted">Enter the monster name here.</small>
+            </div>
+			<div class="form-group">
+              <label for="name">Minimum CR</label>
+              <input type="number" class="form-control" id="crMin" name="crMin" min="0" max="30" step="0.125" aria-describedby="crHelp">
+              <small id="crHelp" class="form-text text-muted">Enter the minimum challenge rating here. It should be a value 0-30.</small>
+            </div>
+		  <div class="form-group">
+              <label for="name">Maximum CR</label>
+			  <input type="number" class="form-control" id="crMax" name="crMax" min="0" max="30" step="0.125" aria-describedby="crHelp">
+              <small id="crHelp" class="form-text text-muted">Enter the maximum challenge rating here. It should be a value 0-30.</small>
             </div>
         </div>
         <div class="modal-footer">

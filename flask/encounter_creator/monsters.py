@@ -2,13 +2,15 @@
 Jackson Hajer - 5/6/21
 from https://flask.palletsprojects.com/en/1.1.x/tutorial/blog/
 """
+import pyodbc
 from flask import (
-    Blueprint, flash, g, redirect, render_template, request, url_for
+    Blueprint, flash, g, redirect, render_template, request, url_for, session
 )
 from werkzeug.exceptions import abort
 
 from .auth import login_required
 from .db import get_cursor
+from .helpers import alignment_code_to_string
 
 bp = Blueprint('monsters', __name__, url_prefix='/monsters')
 
@@ -93,14 +95,14 @@ def search():
     query = request.args['search']
     if query == None or query == '':
         return redirect(url_for('monsters.monsters'))
-    return redirect(url_for('monsters.searchView',name=query))
+    return redirect(url_for('monsters.search_view',name=query))
 
 @bp.route('/search/<name>', methods=['GET','POST'])
-def searchView(name):
+@login_required
+def search_view(name):
     cursor = get_cursor()
     
     cursor.execute("DECLARE @status SMALLINT EXEC @status = get_monster_info @name = ? SELECT @status AS status",name)
-    print(name)
     try:
         monsters_list = cursor.fetchall()
         status = cursor.fetchval()
@@ -112,6 +114,7 @@ def searchView(name):
 
 
 @bp.route('/delete', methods=['POST'])
+@login_required
 def delete():
     name = request.form['name']
 
@@ -142,6 +145,7 @@ def delete():
     return redirect(url_for('monsters.delete'))
 
 @bp.route('/edit', methods=['POST'])
+@login_required
 def edit():
     name = request.form['name']
     new_name = request.form['newName']
@@ -189,3 +193,144 @@ def edit():
 
     flash(error)
     return redirect(url_for('monsters.monsters'))
+
+@bp.route('/search/advanced', methods=['GET','POST'])
+@login_required
+def advanced():
+    name = request.form['name']
+    minCR = request.form['crMin']
+    maxCR = request.form['crMax']
+    dmid = request.form['dmid']
+    type_name = request.form['type']
+
+    return redirect(url_for('monsters.advancedView',name=name,minCR=minCR,maxCR=maxCR,dmid=dmid,type_name=type_name))
+
+@bp.route('/info/<name>', methods=['GET','POST'])
+@login_required
+def info(name):
+    cursor = get_cursor()
+
+    cursor.execute("DECLARE @Status SMALLINT "
+                   "EXEC @Status = get_monster_info @DMID=?, @name=?, @exact=? "
+                   "SELECT @Status AS status", session.get('user_id'), name,1)
+
+    try:
+        monster_info = cursor.fetchone()
+        cursor.nextset()
+        monster_actions = cursor.fetchall()
+        cursor.nextset()
+        status = cursor.fetchval()
+        
+        long_alignment = None
+        if(monster_info.Alignment != 'U'):
+            long_alignment = alignment_code_to_string(monster_info.Alignment, False)
+        lowercase_type = str(monster_info.TypeName).lower()
+        print(lowercase_type)
+    except (pyodbc.ProgrammingError, AttributeError):
+        status = monster_info.status
+
+    if status == 0:
+        return render_template('monsters/info.html', monsters=monster_info,type=lowercase_type,alignment=long_alignment, actions=monster_actions)
+    elif status == 1:
+        print("Somehow, the DMID is null? Logging out")
+        flash("Sorry, something went wrong on our end.")
+        return redirect(url_for('auth.logout'))
+    elif status == 2:
+        print("Someone is trying to screw with our procedures!")
+        flash("Sorry, something went wrong on our end.")
+        return redirect(url_for('auth.logout'))
+    elif status == 3 or status == 4 or status == 5:
+        flash("Sorry, the requested member could not be found.")
+        return redirect(url_for('monsters.monsters'))
+    else:
+        print("Unknown error code for get_monster_info:", status)
+        flash('Sorry, something went wrong on our end.')
+        return redirect(url_for('monsters.monsters'))
+
+@bp.route('/search/advanced/<name>', methods=['GET','POST'])
+@login_required
+def advanced_view(name,minCR,maxCR,dmid,type_name):
+
+    cursor = get_cursor()
+    args = [session.get('user_id')]
+    query_str = "DECLARE @status SMALLINT EXEC @status = FilterMonsters @DMID = ?"
+
+    if type_name != '':
+            args.append(type_name)
+            query_str = query_str + '@type_name = ?,'
+
+    if minCR != '':
+        args.append(minCR)
+        query_str = query_str + '@book_name = ?,'
+
+    if maxCR != '':
+        args.append(maxCR)
+        query_str = query_str + '@align = ?,'
+    
+    query_str = query_str + ' SELECT @status AS status'
+    cursor.execute(query_str,args)
+    try:
+        monsters_list = cursor.fetchall()
+        status = cursor.fetchval()
+    except pyodbc.ProgrammingError:
+        status = 1
+        print('hi, bad things happened')
+        
+    return render_template('monsters/index.html', monsters=monsters_list)
+
+@bp.route('/addAction', methods=['POST'])
+@login_required
+def add_action():
+    monster_name = request.form['monsterName']
+    action_name = request.form['actionName']
+    error = None
+    cursor = get_cursor()
+
+    if not action_name:
+        error = 'Action name is required.'
+    elif len(action_name) > 50:
+        error = 'Action name too long - maximum 50 characters.'
+    elif not monster_name:
+        print("Somehow, monster_name went bad for add action!")
+        flash("Sorry, something went wrong on our end.")
+        return redirect(url_for('monsters.monsters'))
+
+    if error is None:
+        cursor.execute("DECLARE @Status SMALLINT "
+                       "EXEC @Status = add_monster_action @DMID=?, @MonsterName=?, @Name=? "
+                       "SELECT @Status AS status",
+                       session.get('user_id'), monster_name, action_name)
+        status = cursor.fetchval()
+
+        if status == 0:
+            cursor.commit()
+            return redirect(url_for('monsters.info', name=monster_name))
+        elif status == 1:
+            print("Somehow, DMID is null? Exiting...")
+            flash("Sorry, something went wrong on our end.")
+            return redirect(url_for('auth.logout'))
+        elif status == 2:
+            print("Somehow, DM doesn't exist? Logging out.")
+            flash("Sorry, something went wrong on our end.")
+            return redirect(url_for('auth.logout'))
+        elif status == 3:
+            print("Safety check for bad member ID should have triggered earlier in add action view!")
+            error = "Sorry, something went wrong on our end."
+        elif status == 4:
+            error = "Sorry, something went wrong on our end."
+        elif status == 5:
+            print("Someone is trying to mess with the add action procedure!")
+            error = "Sorry, something went wrong on our end."
+        elif status == 6:
+            print("Safety check for bad name should have triggered earlier in create action view!")
+            error = "Sorry, something went wrong on our end."
+        elif status == 7:
+            error = "Sorry, that action doesn't exist. You can create it in the actions catalog."
+        elif status == 8:
+            return redirect(url_for('monsters.info', name=monster_name))
+        else:
+            print("Unknown error code in add_action:", status)
+            error = 'Server error - try again?'
+
+    flash(error)
+    return redirect(url_for('monsters.info', name=monster_name))
