@@ -195,17 +195,6 @@ def edit():
     flash(error)
     return redirect(url_for('monsters.monsters'))
 
-@bp.route('/search/advanced', methods=['GET','POST'])
-@login_required
-def advanced():
-    name = request.form['name']
-    minCR = request.form['crMin']
-    maxCR = request.form['crMax']
-    dmid = request.form['dmid']
-    type_name = request.form['type']
-
-    return redirect(url_for('monsters.advancedView',name=name,minCR=minCR,maxCR=maxCR,dmid=dmid,type_name=type_name))
-
 @bp.route('/info/<name>', methods=['GET','POST'])
 @login_required
 def info(name):
@@ -248,36 +237,50 @@ def info(name):
         flash('Sorry, something went wrong on our end.')
         return redirect(url_for('monsters.monsters'))
 
-@bp.route('/search/advanced/<name>', methods=['GET','POST'])
-@login_required
-def advanced_view(name,minCR,maxCR,dmid,type_name):
 
+@bp.route('/search/advanced', methods=['GET','POST'])
+@login_required
+def advanced():
+    name = request.form['name']
+    minCR = request.form['crMin']
+    maxCR = request.form['crMax']
+    type_name = request.form['type']
     cursor = get_cursor()
+
     args = [session.get('user_id')]
-    query_str = "DECLARE @status SMALLINT EXEC @status = FilterMonsters @DMID = ?"
+
+    query_str = "DECLARE @status SMALLINT EXEC @status = FilterMonsters @DMID = ?,"
+
+    # TODO: implement name with FilterMonsters
+    # if name != '':
+    #     args.append(name)
+    #     query_str = query_str + '@name = ?,'
 
     if type_name != '':
-            args.append(type_name)
-            query_str = query_str + '@type_name = ?,'
+        args.append(type_name)
+        query_str = query_str + '@LikedType = ?,'
 
     if minCR != '':
         args.append(minCR)
-        query_str = query_str + '@book_name = ?,'
+        query_str = query_str + '@MinCRLevel = ?,'
 
     if maxCR != '':
         args.append(maxCR)
-        query_str = query_str + '@align = ?,'
+        query_str = query_str + '@MaxCRLevel = ?,'
     
+    query_str = query_str[:-1]
     query_str = query_str + ' SELECT @status AS status'
     cursor.execute(query_str,args)
     try:
         monsters_list = cursor.fetchall()
+        print(monsters_list)
         status = cursor.fetchval()
     except pyodbc.ProgrammingError:
         status = 1
         print('hi, bad things happened')
         
     return render_template('monsters/index.html', monsters=monsters_list)
+    
 
 @bp.route('/addAction', methods=['POST'])
 @login_required
