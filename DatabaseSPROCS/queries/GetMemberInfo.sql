@@ -55,7 +55,7 @@ FROM Member JOIN Party ON Member.PartyID = Party.ID
 WHERE Member.ID=@MemberID_2
 
 -- Select from Actions table
-SELECT a.Name, a.Description, a.ID
+SELECT a.Name, a.ID
 FROM MemberActions ma JOIN Action a ON ma.ActionID = a.ID
 WHERE ma.MemberID=@MemberID_2
 
