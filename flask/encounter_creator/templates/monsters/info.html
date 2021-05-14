@@ -1,0 +1,84 @@
+{% extends 'base.html' %}
+
+{% block header %}
+<h1>{% block title %}{{ monsters.Name }}{% endblock %}</h1>
+<a href="{{ url_for('monsters.monsters') }}" type="button" class="btn btn-primary"><i class="fas fa-arrow-left"></i>&nbsp;Back</a>
+{% endblock %}
+{% block content %}
+<div class="card">
+    <div class="card-body">
+      <h3 class="card-title">{{ monsters.Name }}</h3>
+      {% if alignment == None %}
+        {% if type != None and monsters.BookName != None %}
+        <h6 class="card-subtitle mb-2 text-muted">A {{ type }} with a challenge rating of {{ monsters.CR }} from {{monsters.BookName}}</h6>
+        {% elif type == None and monsters.BookName == None %}
+        <h6 class="card-subtitle mb-2 text-muted">A monster with a challenge rating of {{ monsters.CR }}</h6>
+        {% elif type != None %}
+        <h6 class="card-subtitle mb-2 text-muted">A {{ type }} with a challenge rating of {{ monsters.CR }}</h6>
+        {% else %}
+        <h6 class="card-subtitle mb-2 text-muted">A monster with a challenge rating of {{ monsters.CR }} from {{monsters.BookName}}</h6>
+        {% endif %}
+      {% else %}
+        {% if type != None and monsters.BookName != None %}
+        <h6 class="card-subtitle mb-2 text-muted">A {{ alignment }} {{ type }} with a challenge rating of {{ monsters.CR }} from {{monsters.BookName}}</h6>
+        {% elif type == None and monsters.BookName == None %}
+        <h6 class="card-subtitle mb-2 text-muted">A {{ alignment }} with a challenge rating of {{ monsters.CR }}</h6>
+        {% elif type != None %}
+        <h6 class="card-subtitle mb-2 text-muted">A {{ alignment }} {{ type }} with a challenge rating of {{ monsters.CR }}</h6>
+        {% else %}
+        <h6 class="card-subtitle mb-2 text-muted">A {{ alignment }} monster with a challenge rating of {{ monsters.CR }} from {{monsters.BookName}}</h6>
+        {% endif %}
+      {% endif %}
+      
+    </div>
+    <div id="accordion">
+        {% for action in actions %}
+        <div class="card my-0">
+          <div class="card-header" id="heading{{ action.ID }}">
+            <h5 class="mb-0">
+              <button class="btn btn-link" data-toggle="collapse" data-target="#collapse{{ action.ID }}" aria-expanded="true" aria-controls="collapse{{ action.ID }}">
+                {{ action.Name }}
+              </button>
+            </h5>
+          </div>
+        </div>
+        {% endfor %}
+        <div class="card my-0">
+          <div class="card-header">
+            <h5 class="mb-0">
+              <button class="btn btn-link" data-toggle="modal" data-target="#addActionModal" class="list-group-item list-group-item-action">
+                <i class="far fa-plus-square"></i>&nbsp;Add an Action
+              </button>
+            </h5>
+          </div>
+        </div>
+      </div>
+</div>
+
+<div class="modal fade" id="addActionModal" tabindex="-1" role="dialog" aria-labelledby="addActionModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="addActionModalLabel">Action for {{ name }}</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <form method="post" action="{{ url_for('monsters.add_action') }}">
+          <div class="modal-body">
+            <div class="form-group">
+              <label for="actionName">Action Name</label>
+              <input class="form-control" id="actionName" name="actionName" maxlength="50" required aria-describedby="actionNameHelp">
+              <small id="actionNameHelp" class="form-text text-muted">Enter the action's name here. Use the <a href="{{ url_for('actions.actions', page_num=1) }}">action catalog</a> to find one.</small>
+            </div>
+            <input type="text" name="monsterName" value="{{ name }}" hidden>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+            <button type="submit" class="btn btn-primary">Add</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+{% endblock %}

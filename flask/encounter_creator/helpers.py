@@ -35,3 +35,7 @@ def alignment_code_to_string(code, capitalize):
         if capitalize:
             return 'Chaotic Evil'
         return 'chaotic evil'
+    elif code == 'U':
+        if capitalize:
+            return 'Unspecified'
+        return 'unspecified'
