@@ -1,41 +1,17 @@
 {% extends 'base.html' %}
 
 {% block header %}
-  <h1>{% block title %}Welcome to Encounter Creator!{% endblock %}</h1>
+  <h1>{% block title %}My Settings{% endblock %}</h1>
 {% endblock %}
-
 {% block content %}
-  <div>
-    Introduction to Encounter Creator
-  </div>
-{% endblock %}
-
-
-{% extends 'base.html' %}
-
-{% block header %}
-  <h1>{% block title %}Parties{% endblock %}</h1>
-  {% if g.user %}
-    <a class="action" href="{{ url_for('blog.create') }}">New</a>
-  {% endif %}
-{% endblock %}
-
-{% block content %}
-  {% for post in posts %}
-    <article class="post">
-      <header>
-        <div>
-          <h1>{{ post['title'] }}</h1>
-          <div class="about">by {{ post['username'] }} on {{ post['created'].strftime('%Y-%m-%d') }}</div>
-        </div>
-        {% if g.user['id'] == post['author_id'] %}
-          <a class="action" href="{{ url_for('blog.update', id=post['id']) }}">Edit</a>
-        {% endif %}
-      </header>
-      <p class="body">{{ post['body'] }}</p>
-    </article>
-    {% if not loop.last %}
-      <hr>
-    {% endif %}
-  {% endfor %}
+  <h2>My Books</h2>
+  <p>These are the books that you own. The encounter creator will only recommend monsters from the checked books below.</p>
+  <form action="{{url_for('main.save_books')}}" method="POST">
+    {% for book in books %}
+    <input type="checkbox" id="{{book.ID}}" name="{{book.ID}}" {% if book.Owned %}checked{% endif %}>
+    <label for="{{book.ID}}">{% if book.Name %}{{book.Name}}{% else %}Empty Name{% endif %}</label>
+    <br>
+    {% endfor %}
+    <button class="btn btn-primary" type="submit">Save Changes</button>
+  </form>
 {% endblock %}
