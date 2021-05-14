@@ -22,8 +22,7 @@ GO
 -- =============================================
 CREATE PROCEDURE [dbo].[create_action]
 	-- Add the parameters for the stored procedure here
-	@Name varchar(50),
-	@Description varchar(200)
+	@Name varchar(50)
 AS
 BEGIN
 	-- SET NOCOUNT ON added to prevent extra result sets from
@@ -40,7 +39,7 @@ BEGIN
 END
 
 
-Insert into Action(Name, Description)
-Values(@Name, @Description)
+Insert into Action(Name)
+Values(@Name)
 END
 GO

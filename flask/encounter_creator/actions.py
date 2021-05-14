@@ -49,12 +49,12 @@ def search():
 
     actions_list = []
     cursor = get_cursor()
-    query = request.args.get('search', '')
+    query = request.args.get('search', '').strip()
     if len(query) < 3:
         flash("Sorry, you must search by at least 3 characters.")
         return redirect(url_for('actions.actions', page_num=1))
     elif len(query) > 50:
-        flash("Sorry, you must search by at less than 50 characters.")
+        flash("Sorry, you must search by at most 50 characters.")
         return redirect(url_for('actions.actions', page_num=1))
 
     cursor.execute("DECLARE @Status SMALLINT "
@@ -71,10 +71,12 @@ def search():
         return render_template('actions/index.html', actions=actions_list, pageNum=1, maxPage=1)
     elif status == 1:
         print("Check for bad query should have triggered earlier in action search!")
+        error = "Sorry, you must search by at least 3 characters."
     else:
         print("Unknown error code for search_actions:", status)
+        error = "Sorry, something went wrong on our end."
 
-    flash("Sorry, something went wrong on our end.")
+    flash()
     return redirect(url_for('actions.actions', page_num=1))
 
 
@@ -82,7 +84,6 @@ def search():
 @bp.route('/create', methods=['POST'])
 def create():
     name = request.form['name']
-    description = request.form['description']
     error = None
     cursor = get_cursor()
 
@@ -90,16 +91,12 @@ def create():
         error = 'Action name is required.'
     elif len(name) > 50:
         error = 'Action name too long - maximum 50 characters.'
-    elif not description:
-        error = 'Action description is required.'
-    elif len(description) > 200:
-        error = 'Action description too long - maximum 200 characters.'
 
     if error is None:
         cursor.execute("DECLARE @Status SMALLINT "
-                       "EXEC @Status = create_action @Name=?, @Description=? "
+                       "EXEC @Status = create_action @Name=? "
                        "SELECT @Status AS status",
-                       name, description)
+                       name)
         status = cursor.fetchval()
 
         if status == 0:

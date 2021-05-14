@@ -45,7 +45,7 @@ END
 
 
 -- Get values
-SELECT Name, Description
+SELECT Name
 FROM Action
 ORDER BY Name
 OFFSET (30 * (@Page_1 - 1)) ROWS FETCH NEXT 30 ROWS ONLY

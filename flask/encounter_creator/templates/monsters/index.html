@@ -27,6 +27,7 @@
 					<th>Book</th>
 					<th>Alignment</th>
           <th>More Info</th>
+          <th>Liked</th>
 				</tr>
 			</thead>    
 			<tbody>
@@ -38,6 +39,7 @@
 						<td>{{monster.BookName}}</td>
 						<td>{{monster.Alignment}}</td>
 						<td><a href="{{ url_for('monsters.info', name = monster.Name)}}">More Info</a></td>
+						<td><a href="{{ url_for('monsters.toggle_liked', monster_id=monster.ID) }}">{% if monster.Liked %}<i class="fas fa-star"></i>{% else %}<i class="far fa-star"></i>{% endif %}</a></td>
 					</tr>
 				{% endfor %}
 			</tbody>
