@@ -95,16 +95,6 @@ def search():
     query = request.args['search']
     if query is None or query == '':
         return redirect(url_for('monsters.monsters'))
-<<<<<<< HEAD
-    return redirect(url_for('monsters.search_view',name=query))
-
-@bp.route('/search/<name>', methods=['GET','POST'])
-@login_required
-def search_view(name):
-    cursor = get_cursor()
-    
-    cursor.execute("DECLARE @status SMALLINT EXEC @status = get_monster_info @name = ? SELECT @status AS status",name)
-=======
     return redirect(url_for('monsters.searchView', name=query))
 
 
@@ -113,7 +103,6 @@ def searchView(name):
     cursor = get_cursor()
 
     cursor.execute("DECLARE @status SMALLINT EXEC @status = get_monster_info @name=?, @DMID=? SELECT @status AS status", name, session['user_id'])
->>>>>>> 8ad36f1e0be50455f5a94bcc0de5c4a6193f8477
     try:
         monsters_list = cursor.fetchall()
         print(monsters_list)
@@ -206,7 +195,6 @@ def edit():
     flash(error)
     return redirect(url_for('monsters.monsters'))
 
-<<<<<<< HEAD
 @bp.route('/search/advanced', methods=['GET','POST'])
 @login_required
 def advanced():
@@ -347,7 +335,6 @@ def add_action():
 
     flash(error)
     return redirect(url_for('monsters.info', name=monster_name))
-=======
 
 @bp.route('/toggle', methods=['GET'])
 @login_required
@@ -377,4 +364,3 @@ def toggle_liked():
             error = "Sorry, something went wrong on our end."
     flash(error)
     return redirect(url_for('monsters.monsters'))
->>>>>>> 8ad36f1e0be50455f5a94bcc0de5c4a6193f8477
