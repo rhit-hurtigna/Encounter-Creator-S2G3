@@ -12,7 +12,7 @@ def init_app(app):
 
 def get_cursor():
     if 'conn' not in g:
-        g.conn = pyodbc.connect('Driver={SQL Server Native Client 11.0};'
+        g.conn = pyodbc.connect('Driver={ODBC Driver 17 for SQL Server};'
                                 'Server=titan.csse.rose-hulman.edu;'
                                 'Database=EncounterCreatorS2G3;'
                                 'UID=EncounterCreatorAppAccount;PWD=YcOhgYfkzaPp!99Y#fEz;')
