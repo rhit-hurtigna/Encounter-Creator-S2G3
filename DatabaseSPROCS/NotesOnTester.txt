@@ -1,0 +1,39 @@
+Replace all EncounterCreator with EncounterCreator_Final
+
+
+
+
+
+ALTER DATABASE [EncounterCreator_FinalS2G3] SET TRUSTWORTHY OFF 
+GO
+
+ALTER DATABASE [EncounterCreator_FinalS2G3] SET HONOR_BROKER_PRIORITY OFF 
+GO
+
+ALTER DATABASE [EncounterCreator_FinalS2G3] SET DB_CHAINING OFF 
+GO
+
+delete because we don't have authentication
+
+
+
+
+
+
+CREATE USER [EncounterCreator_FinalAppAccount] FOR LOGIN [EncounterCreator_FinalAppAccount] WITH DEFAULT_SCHEMA=[dbo]
+GO
+
+Edit name to EncounterCreatorAppAccount like so:
+
+CREATE USER [EncounterCreator_FinalAppAccount] FOR LOGIN [EncounterCreatorAppAccount] WITH DEFAULT_SCHEMA=[dbo]
+GO
+
+
+
+
+
+
+
+
+Add to the back:
+the stuff that GrantPermissions spits out
