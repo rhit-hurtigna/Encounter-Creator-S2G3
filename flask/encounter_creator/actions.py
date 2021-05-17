@@ -35,8 +35,14 @@ def actions(page_num):
         status = actions_list[0][0]
     if status == 0:
         return render_template('actions/index.html', actions=actions_list, pageNum=page_num, maxPage=max_page)
-    elif status == 1 or status == 2:
-        pass
+    elif status == 1:
+        print("Invalid page num!")
+    elif status == 2:
+        print("Empty page!")
+    elif status == 3:
+        print("No actions in the database? That's not a good sign!")
+        flash("Looks like we don't have any actions in the database yet. In the meantime, go read a book or something!")
+        return redirect(url_for('main.index'))
     else:
         print("Unknown error code for get_actions:", status)
 
