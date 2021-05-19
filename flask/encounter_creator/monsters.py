@@ -259,7 +259,7 @@ def advanced():
 
     if book_name != '':
         args.append(book_name)
-        query_str = query_str + '@LikedBook = ?'
+        query_str = query_str + '@LikedBook = ?,'
 
     if minCR != '':
         args.append(minCR)
