@@ -242,6 +242,7 @@ def advanced():
     minCR = request.form['crMin']
     maxCR = request.form['crMax']
     type_name = request.form['type']
+    book_name = request.form['book']
     cursor = get_cursor()
 
     args = [session.get('user_id')]
@@ -255,6 +256,10 @@ def advanced():
     if type_name != '':
         args.append(type_name)
         query_str = query_str + '@LikedType = ?,'
+
+    if book_name != '':
+        args.append(book_name)
+        query_str = query_str + '@LikedBook = ?'
 
     if minCR != '':
         args.append(minCR)
