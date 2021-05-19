@@ -105,7 +105,6 @@ def searchView(name):
     cursor.execute("DECLARE @status SMALLINT EXEC @status = get_monster_info @name=?, @DMID=? SELECT @status AS status", name, session['user_id'])
     try:
         monsters_list = cursor.fetchall()
-        print(monsters_list)
         status = cursor.fetchval()
     except pyodbc.ProgrammingError:
         status = 1
@@ -184,7 +183,6 @@ def edit():
 
     query_str = query_str[:-1]
     query_str = query_str + ' SELECT @status AS status'
-    print(query_str)
     cursor.execute(query_str, args)
     status = cursor.fetchval()
 
@@ -215,7 +213,6 @@ def info(name):
         if(monster_info.Alignment != 'U'):
             long_alignment = alignment_code_to_string(monster_info.Alignment, False)
         lowercase_type = str(monster_info.TypeName).lower()
-        print(lowercase_type)
     except (pyodbc.ProgrammingError, AttributeError):
         status = monster_info.status
 
@@ -272,7 +269,6 @@ def advanced():
     cursor.execute(query_str,args)
     try:
         monsters_list = cursor.fetchall()
-        print(monsters_list)
         status = cursor.fetchval()
     except pyodbc.ProgrammingError:
         status = 1
