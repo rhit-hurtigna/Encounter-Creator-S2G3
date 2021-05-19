@@ -9,7 +9,7 @@
 {% block content %}
 	<form action="{{url_for('monsters.search')}}">
 		<input class="form-control" name="search" placeholder="Search..." autocomplete="off" autofocus="autofocus" type="text">
-    <button type="button" class="btn btn-primary" data-target="#advSearchMonsterModal" data-toggle="modal"><i class="far fa-plus-square"></i>&nbsp;Advanced Search</button>
+    <button type="button" class="btn btn-primary" data-target="#advancedSearchMonsterModal" data-toggle="modal"><i class="far fa-plus-square"></i>&nbsp;Advanced Search</button>
 		</form>
 	<div>
 		<style>
@@ -59,12 +59,12 @@
         <div class="modal-body">
           <div class="form-group">
               <label for="name">Monster Name</label>
-              <input class="form-control" id="name" name="name" maxlength="50" aria-describedby="nameHelp">
+              <input class="form-control" id="name" name="name" maxlength="50" required aria-describedby="nameHelp">
               <small id="nameHelp" class="form-text text-muted">Enter the monster name here.</small>
             </div>
 		  <div class="form-group">
               <label for="name">Monster CR</label>
-			  <input type="number" class="form-control" id="cr" name="cr" min="0" max="30" step="0.125" value="0" aria-describedby="crHelp">
+			  <input type="number" class="form-control" id="cr" name="cr" min="0" max="30" step="0.125" value="0" required aria-describedby="crHelp">
               <small id="crHelp" class="form-text text-muted">Enter the monster challenge rating here. It should be a value 0-30.</small>
             </div>
 	      <div class="form-group">
@@ -166,11 +166,11 @@
   </div>
 </div>
 
-<div class="modal fade" id="advSearchMonsterModal" tabindex="-1" role="dialog" aria-labelledby="advSearchMonsterModalLabel" aria-hidden="true">
+<div class="modal fade" id="advancedSearchMonsterModal" tabindex="-1" role="dialog" aria-labelledby="advancedSearchMonsterModalLabel" aria-hidden="true">
   <div class="modal-dialog" role="document">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="advSearchMonsterModalLabel">Advanced Search</h5>
+        <h5 class="modal-title" id="advancedSearchMonsterModalLabel">Advanced Search</h5>
         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
           <span aria-hidden="true">&times;</span>
         </button>
@@ -179,12 +179,12 @@
         <div class="modal-body">
             <div class="form-group">
               <label for="name">Name</label>
-              <input class="form-control" id="name" name="name" maxlength="50" required aria-describedby="nameHelp">
+              <input class="form-control" id="name" name="name" maxlength="50" aria-describedby="nameHelp">
               <small id="nameHelp" class="form-text text-muted">Enter the name here.</small>
             </div>
             <div class="form-group">
               <label for="name">Type</label>
-              <input class="form-control" id="type" name="type" maxlength="50" required aria-describedby="typeHelp">
+              <input class="form-control" id="type" name="type" maxlength="50" aria-describedby="typeHelp">
               <small id="typeHelp" class="form-text text-muted">Enter the type here.</small>
             </div>
 			<div class="form-group">

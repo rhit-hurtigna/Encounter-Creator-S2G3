@@ -251,10 +251,9 @@ def advanced():
 
     query_str = "DECLARE @status SMALLINT EXEC @status = FilterMonsters @DMID = ?,"
 
-    # TODO: implement name with FilterMonsters
-    # if name != '':
-    #     args.append(name)
-    #     query_str = query_str + '@name = ?,'
+    if name != '':
+        args.append(name)
+        query_str = query_str + '@name = ?,'
 
     if type_name != '':
         args.append(type_name)
