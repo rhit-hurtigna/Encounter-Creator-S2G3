@@ -337,6 +337,7 @@ def add_action():
     flash(error)
     return redirect(url_for('monsters.info', name=monster_name))
 
+
 @bp.route('/toggle', methods=['GET'])
 @login_required
 def toggle_liked():

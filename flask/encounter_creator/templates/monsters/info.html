@@ -71,7 +71,7 @@
               <input class="form-control" id="actionName" name="actionName" maxlength="50" required aria-describedby="actionNameHelp">
               <small id="actionNameHelp" class="form-text text-muted">Enter the action's name here. Use the <a href="{{ url_for('actions.actions', page_num=1) }}">action catalog</a> to find one.</small>
             </div>
-            <input type="text" name="monsterName" value="{{ name }}" hidden>
+            <input type="text" name="monsterName" value="{{ monsters.Name }}" hidden>
           </div>
           <div class="modal-footer">
             <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
