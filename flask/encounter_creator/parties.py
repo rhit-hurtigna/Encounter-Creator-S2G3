@@ -54,7 +54,33 @@ def parties():
             print("Unknown error code for get_party_members:", status)
             continue
 
-    return render_template('parties/index.html', parties=parties_list)
+    # Get types, books
+    cursor.execute("DECLARE @Status SMALLINT "
+                   "EXEC @Status = get_types_and_books @DMID_1=? "
+                   "SELECT @Status AS status", session['user_id'])
+    types = None
+    try:
+        types = cursor.fetchall()
+        cursor.nextset()
+        books = cursor.fetchall()
+        cursor.nextset()
+        status = cursor.fetchval()
+    except pyodbc.ProgrammingError:
+        status = types[0][0]
+
+    if status == 0:
+
+        for index, type_tuple in enumerate(types):
+            types[index] = type_tuple[0]
+
+        for index, book_tuple in enumerate(books):
+            books[index] = book_tuple[0]
+
+        return render_template('parties/index.html', parties=parties_list, types=types, books=books)
+    elif status == 1 or status == 2:
+        print("Something terrible happened with DM IDs and the parties main page!")
+        flash("Sorry, something went wrong on our end.")
+        return redirect(url_for('auth.logout'))
 
 
 @bp.route('/member/<member_id>', methods=['GET'])
@@ -529,9 +555,38 @@ def encounter():
             status = cursor.fetchval()
         except pyodbc.ProgrammingError:
             status = monsters[0][0]
-        print(monsters)
+
         if status == 0:
-            return redirect(url_for('parties.parties'))
+
+            # Get types, books
+            cursor.execute("DECLARE @Status SMALLINT "
+                           "EXEC @Status = get_types_and_books @DMID_1=? "
+                           "SELECT @Status AS status", session['user_id'])
+            types = None
+            try:
+                types = cursor.fetchall()
+                cursor.nextset()
+                books = cursor.fetchall()
+                cursor.nextset()
+                status = cursor.fetchval()
+            except pyodbc.ProgrammingError:
+                status = types[0][0]
+
+            if status == 0:
+
+                for index, type_tuple in enumerate(types):
+                    types[index] = type_tuple[0]
+
+                for index, book_tuple in enumerate(books):
+                    books[index] = book_tuple[0]
+
+                return render_template('monsters/encounter.html', monsters=monsters, party_id=party_id, types=types,
+                                       books=books)
+            elif status == 1 or status == 2:
+                print("Something terrible happened with DM IDs and the parties main page!")
+                flash("Sorry, something went wrong on our end.")
+                return redirect(url_for('auth.logout'))
+
         elif status == 1:
             print("Somehow, DMID is null? Exiting...")
             flash("Sorry, something went wrong on our end.")

@@ -1,0 +1,297 @@
+{% extends 'base.html' %}
+
+{% block header %}
+  <h1>{% block title %}Recommended Monsters{% endblock %}</h1>
+  <button type="button" class="btn btn-primary float-right mx-2" data-target="#encounterModal" data-toggle="modal"><i class="fas fa-dice-d20"></i>&nbsp;Reroll!</button>
+{% endblock %}
+{% block content %}
+	<div>
+		<style>
+			td {
+				border: 1px solid black;
+				padding: 5px;
+			  }
+		</style>
+		<table>
+          {% if monsters %}
+			<thead>
+				<tr>
+					<th>Name</th>
+					<th>CR</th>
+					<th>Type</th>
+					<th>Book</th>
+					<th>Alignment</th>
+                    <th>More Info</th>
+                    <th>Liked</th>
+				</tr>
+			</thead>    
+			<tbody>
+			 {% for monster in monsters %}    
+					<tr>
+						<td>{{monster.Name}}</td>
+						<td>{{monster.CR}}</td>
+						<td>{{monster.TypeName}}</td>
+						<td>{{monster.BookName}}</td>
+						<td>{{monster.Alignment}}</td>
+						<td><a href="{{ url_for('monsters.info', name = monster.Name)}}">More Info</a></td>
+						<td>{% if monster.Liked %}<i class="fas fa-star"></i>{% else %}<i class="far fa-star"></i>{% endif %}</td>
+					</tr>
+             {% endfor %}
+            {% else %}
+             <h2 class="m-2">Oops! Looks like your filters were a little too fine. Try not filtering by type and book at the same time.</h2>
+            {% endif %}
+			</tbody>
+		</table>
+	</div>
+
+<div class="modal fade" id="encounterModal" tabindex="-1" role="dialog" aria-labelledby="encounterModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="encounterModalLabel">Generate An Encounter</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <form method="post" action="{{ url_for('parties.encounter') }}">
+        <div class="modal-body">
+          <div class="form-group">
+            <label for="difficulty">Difficulty</label>
+            <select class="form-control" id="difficulty" name="difficulty" required aria-describedby="difficultyHelp">
+              <option value="" selected disabled>--</option>
+              <option value=".34">Easy</option>
+              <option value=".44">Medium</option>
+              <option value=".54">Hard</option>
+              <option value=".64">Deadly</option>
+            </select>
+            <small id="difficultyHelp" class="form-text text-muted">We'll automatically adjust the CR to your member's levels.</small>
+          </div>
+          <div class="form-group">
+            <label for="number">Number Of Monsters</label>
+            <input type="number" class="form-control" id="number" name="number" required value="1" min="1" max="20" step="1" aria-describedby="numberHelp">
+            <small id="numberHelp" class="form-text text-muted">We'll adjust CR for this, too!</small>
+          </div>
+          <div class="form-group">
+            <label for="type">Type</label>
+            <select class="form-control" id="encounterType" name="type" aria-describedby="encounterTypeHelp">
+              <option value="" selected disabled>--</option>
+              {% for type in types %}
+              <option value="{{type}}">{{type}}</option>
+              {% endfor %}
+            </select>
+            <small id="encounterTypeHelp" class="form-text text-muted">Feel free to leave this blank.</small>
+          </div>
+          <div class="form-group">
+            <label for="book">Book</label>
+            <select class="form-control" id="encounterBook" name="book" aria-describedby="encounterBookHelp">
+              <option value="" selected disabled>--</option>
+              {% for book in books %}
+              <option value="{{book}}">{{book}}</option>
+              {% endfor %}
+            </select>
+            <small id="encounterBookHelp" class="form-text text-muted">Feel free to leave this blank.</small>
+          </div>
+          <input class="partyID" type="number" name="partyID" value="{{party_id}}"hidden>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-primary">Show me the monsters!</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="createMonsterModal" tabindex="-1" role="dialog" aria-labelledby="createMonsterModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="createMonsterModalLabel">Create a Monster</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <form method="post" action="{{ url_for('monsters.create') }}">
+        <div class="modal-body">
+          <div class="form-group">
+              <label for="name">Monster Name</label>
+              <input class="form-control" id="name" name="name" maxlength="50" required aria-describedby="nameHelp">
+              <small id="nameHelp" class="form-text text-muted">Enter the monster name here.</small>
+            </div>
+		  <div class="form-group">
+              <label for="name">Monster CR</label>
+			  <input type="number" class="form-control" id="cr" name="cr" min="0" max="30" step="0.125" value="0" required aria-describedby="crHelp">
+              <small id="crHelp" class="form-text text-muted">Enter the monster challenge rating here. It should be a value 0-30.</small>
+            </div>
+	      <div class="form-group">
+              <label for="name">Monster Type</label>
+			  <input class="form-control" id="type" name="type" maxlength="50" aria-describedby="typeHelp">
+              <small id="typeHelp" class="form-text text-muted">Enter the type the monster is.</small>
+            </div>
+		  <div class="form-group">
+              <label for="name">Monster Book</label>
+			  <input class="form-control" id="book" name="book" maxlength="50" aria-describedby="bookHelp">
+              <small id="bookHelp" class="form-text text-muted">Enter the book name the monster is from.</small>
+            </div>
+		  <div class="form-group">
+              <label for="name">Monster Alignment</label>
+			  <select class="form-control" id="alignment" name="alignment" aria-describedby="alignmentHelp">
+              <option value="">--</option>
+              <option>LG</option>
+              <option>LN</option>
+              <option>LE</option>
+              <option>NG</option>
+              <option>TN</option>
+              <option>NE</option>
+              <option>CG</option>
+              <option>CN</option>
+              <option>CE</option>
+            </select>
+			<small id="alignmentHelp" class="form-text text-muted">Enter the monster's alignment here.</small>
+            </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-primary">Create Monster</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+
+<div class="modal fade" id="editMonsterModal" tabindex="-1" role="dialog" aria-labelledby="editMonsterModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="editMonsterModalLabel">Edit Monster</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <form method="post" action="{{ url_for('monsters.edit') }}">
+        <div class="modal-body">
+            <div class="form-group">
+              <label for="name">Monster Name</label>
+              <input class="form-control" id="name" name="name" maxlength="50" required aria-describedby="nameHelp">
+              <small id="nameHelp" class="form-text text-muted">Enter the monster name here.</small>
+            </div>
+			<div class="form-group">
+              <label for="name">New Monster Name</label>
+              <input class="form-control" id="newName" name="newName" maxlength="50" aria-describedby="newNameHelp">
+              <small id="nameHelp" class="form-text text-muted">Enter the new monster name here.</small>
+            </div>
+		  <div class="form-group">
+              <label for="name">Monster CR</label>
+			  <input type="number" class="form-control" id="cr" name="cr" min="0" max="30" step="0.125" aria-describedby="crHelp">
+              <small id="crHelp" class="form-text text-muted">Enter the new monster challenge rating here. It should be a value 0-30.</small>
+            </div>
+	      <div class="form-group">
+              <label for="name">Monster Type</label>
+			  <input class="form-control" id="type" name="type" maxlength="50" aria-describedby="typeHelp">
+              <small id="typeHelp" class="form-text text-muted">Enter the new type the monster is.</small>
+            </div>
+		  <div class="form-group">
+              <label for="name">Monster Book</label>
+			  <input class="form-control" id="book" name="book" maxlength="50" aria-describedby="bookHelp">
+              <small id="bookHelp" class="form-text text-muted">Enter the new book name the monster is from.</small>
+            </div>
+		  <div class="form-group">
+              <label for="name">Monster Alignment</label>
+			  <select class="form-control" id="alignment" name="alignment" aria-describedby="alignmentHelp">
+              <option value="">--</option>
+              <option>LG</option>
+              <option>LN</option>
+              <option>LE</option>
+              <option>NG</option>
+              <option>TN</option>
+              <option>NE</option>
+              <option>CG</option>
+              <option>CN</option>
+              <option>CE</option>
+            </select>
+			<small id="alignmentHelp" class="form-text text-muted">Enter the monster's new alignment here.</small>
+            </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-primary">Submit</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="advancedSearchMonsterModal" tabindex="-1" role="dialog" aria-labelledby="advancedSearchMonsterModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="advancedSearchMonsterModalLabel">Advanced Search</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <form method="post" action="{{ url_for('monsters.advanced') }}">
+        <div class="modal-body">
+            <div class="form-group">
+              <label for="name">Name</label>
+              <input class="form-control" id="name" name="name" maxlength="50" aria-describedby="nameHelp">
+              <small id="nameHelp" class="form-text text-muted">Enter the name here.</small>
+            </div>
+            <div class="form-group">
+              <label for="name">Type</label>
+              <input class="form-control" id="type" name="type" maxlength="50" aria-describedby="typeHelp">
+              <small id="typeHelp" class="form-text text-muted">Enter the type here.</small>
+            </div>
+            <div class="form-group">
+              <label for="name">Book</label>
+              <input class="form-control" id="book" name="book" maxlength="50" aria-describedby="bookHelp">
+              <small id="bookHelp" class="form-text text-muted">Enter the book here.</small>
+            </div>
+            <div class="form-group">
+              <label for="name">Minimum CR</label>
+              <input type="number" class="form-control" id="crMin" name="crMin" min="0" max="30" step="0.125" aria-describedby="crHelp">
+              <small id="crHelp" class="form-text text-muted">Enter the minimum challenge rating here. It should be a value 0-30.</small>
+            </div>
+            <div class="form-group">
+              <label for="name">Maximum CR</label>
+              <input type="number" class="form-control" id="crMax" name="crMax" min="0" max="30" step="0.125" aria-describedby="crHelp">
+              <small id="crHelp" class="form-text text-muted">Enter the maximum challenge rating here. It should be a value 0-30.</small>
+            </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-primary">Submit</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="deleteMonsterModal" tabindex="-1" role="dialog" aria-labelledby="deleteMonsterModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="deleteMonsterModalLabel">Delete Monster</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <form method="post" action="{{ url_for('monsters.delete') }}">
+        <div class="modal-body">
+            <div class="form-group">
+              <label for="name">Monster Name</label>
+              <input class="form-control" id="name" name="name" maxlength="50" required aria-describedby="nameHelp">
+              <small id="nameHelp" class="form-text text-muted">Enter the monster's name to be deleted here.</small>
+            </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-danger"><i class="far fa-trash-alt"></i>&nbsp;Delete</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
