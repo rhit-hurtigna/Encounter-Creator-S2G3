@@ -9,9 +9,12 @@
     <div class="card">
       <div class="card-body">
         <div class="card-title row">
-          <h3 class="col-9">{{ party['name'] }}</h3>
-          <div class="col-3">
-            <button type="button" class="btn btn-primary float-right" data-target="#editPartyModal" data-toggle="modal" onclick="document.querySelectorAll('.partyID').forEach((element) => element.value='{{ party['id'] }}'); document.getElementById('newName').value = '{{ party['name'] }}'"><i class="far fa-edit"></i>&nbsp;Edit</button>
+          <h3 class="col-8">{{ party['name'] }}</h3>
+          <div class="col-4 row justify-content-end">
+            {% if party['members'] %}
+            <button type="button" class="btn btn-primary float-right mx-2" data-target="#encounterModal" data-toggle="modal" onclick="document.querySelectorAll('.partyID').forEach((element) => element.value='{{ party['id'] }}'); document.getElementById('newName').value = '{{ party['name'] }}'"><i class="fas fa-dice-d20"></i>&nbsp;Encounter!</button>
+            {% endif %}
+            <button type="button" class="btn btn-primary float-right mx-2" data-target="#editPartyModal" data-toggle="modal" onclick="document.querySelectorAll('.partyID').forEach((element) => element.value='{{ party['id'] }}'); document.getElementById('newName').value = '{{ party['name'] }}'"><i class="far fa-edit"></i>&nbsp;Edit</button>
           </div>
         </div>
           <div class="list-group">
@@ -23,6 +26,64 @@
       </div>
     </div>
   {% endfor %}
+
+<div class="modal fade" id="encounterModal" tabindex="-1" role="dialog" aria-labelledby="encounterModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="encounterModalLabel">Generate An Encounter</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <form method="post" action="{{ url_for('parties.encounter') }}">
+        <div class="modal-body">
+          <div class="form-group">
+            <label for="difficulty">Difficulty</label>
+            <select class="form-control" id="difficulty" name="difficulty" required aria-describedby="difficultyHelp">
+              <option value="" selected disabled>--</option>
+              <option value=".34">Easy</option>
+              <option value=".44">Medium</option>
+              <option value=".54">Hard</option>
+              <option value=".64">Deadly</option>
+            </select>
+            <small id="difficultyHelp" class="form-text text-muted">We'll automatically adjust the CR to your member's levels.</small>
+          </div>
+          <div class="form-group">
+            <label for="number">Number Of Monsters</label>
+            <input type="number" class="form-control" id="number" name="number" required value="1" min="1" max="20" step="1" aria-describedby="numberHelp">
+            <small id="numberHelp" class="form-text text-muted">We'll adjust CR for this, too!</small>
+          </div>
+          <div class="form-group">
+            <label for="type">Type</label>
+            <select class="form-control" id="type" name="type" aria-describedby="typeHelp">
+              <option value="" selected disabled>--</option>
+              {% for type in types %}
+              <option value="{{type}}">{{type}}</option>
+              {% endfor %}
+            </select>
+            <small id="typeHelp" class="form-text text-muted">Feel free to leave this blank.</small>
+          </div>
+          <div class="form-group">
+            <label for="book">Book</label>
+            <select class="form-control" id="book" name="book" aria-describedby="bookHelp">
+              <option value="" selected disabled>--</option>
+              {% for book in books %}
+              <option value="{{book}}">{{book}}</option>
+              {% endfor %}
+            </select>
+            <small id="bookHelp" class="form-text text-muted">Feel free to leave this blank.</small>
+          </div>
+          <input class="partyID" type="number" name="partyID" hidden>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-primary">Show me the monsters!</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
 
 <div class="modal fade" id="createPartyModal" tabindex="-1" role="dialog" aria-labelledby="createPartyModalLabel" aria-hidden="true">
   <div class="modal-dialog" role="document">

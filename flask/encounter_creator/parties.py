@@ -479,3 +479,85 @@ def add_action():
 
     flash(error)
     return redirect(url_for('parties.member', member_id=member_id))
+
+
+@bp.route('/encounter', methods=['POST'])
+@login_required
+def encounter():
+    party_id = request.form.get('partyID', None)
+    difficulty = float(request.form.get('difficulty', None))
+    number = int(request.form.get('number', None))
+    liked_type = request.form.get('type', None)
+    book = request.form.get('book', None)
+
+    error = None
+    cursor = get_cursor()
+
+    if difficulty is None:
+        flash("Difficulty is required.")
+        return redirect((url_for('parties.parties')))
+    if difficulty <= 0:
+        print("Someone is messing with the difficulty param for encounter!")
+        flash("Sorry, something went wrong on our end.")
+        return redirect(url_for('parties.parties'))
+    if number < 0 or number > 20:
+        flash("Sorry, you can only have 1-20 monsters in an encounter.")
+        return redirect(url_for('parties.parties'))
+    if liked_type is not None and len(liked_type) > 50:
+        print("Someone messed with the type param for encounter!")
+        flash("Sorry, something went wrong on our end.")
+        return redirect(url_for('parties.parties'))
+    if book is not None and len(book) > 50:
+        print("Someone messed with the book param for encounter!")
+        flash("Sorry, something went wrong on our end.")
+        return redirect(url_for('parties.parties'))
+    if party_id is None:
+        print("Somehow, party_id went bad for encounter!")
+        flash("Sorry, something went wrong on our end.")
+        return redirect(url_for('parties.parties'))
+
+    if error is None:
+        cursor.execute("DECLARE @Status SMALLINT "
+                       "EXEC @Status = calculateEncounter @DM_ID=?, @PartyID=?, @DifficultyMultiplier=?, "
+                       "@NumberOfMonsters=?, @LikedBook=?, @LikedType=? "
+                       "SELECT @Status AS status",
+                       session.get('user_id'), party_id, difficulty, number, book, liked_type)
+        monsters = None
+        try:
+            monsters = cursor.fetchall()
+            cursor.nextset()
+            status = cursor.fetchval()
+        except pyodbc.ProgrammingError:
+            status = monsters[0][0]
+        print(monsters)
+        if status == 0:
+            return redirect(url_for('parties.parties'))
+        elif status == 1:
+            print("Somehow, DMID is null? Exiting...")
+            flash("Sorry, something went wrong on our end.")
+            return redirect(url_for('auth.logout'))
+        elif status == 2:
+            print("Check for bad party ID should have triggered early for encounter!")
+            flash("Sorry, something went wrong on our end.")
+            return redirect(url_for('parties.parties'))
+        elif status == 3:
+            print("Someone is trying to gen an encounter for a party they don't own!")
+            error = "Sorry, something went wrong on our end."
+        elif status == 4:
+            print("Why is someone generating an encounter for a memberless party?")
+            error = "Sorry, something went wrong on our end."
+        elif status == 5 or status == 6:
+            print("Check for bad difficulty should have triggered earlier in encounter!")
+            error = "Sorry, something went wrong on our end."
+        elif status == 8:
+            print("Someone messed with the book param in encounter!!")
+            error = "Sorry, something went wrong on our end."
+        elif status == 9:
+            print("Someone messed with the type param in encounter!!")
+            error = "Sorry, something went wrong on our end."
+        else:
+            print("Unknown error code in calculateEncounter:", status)
+            error = 'Server error - try again?'
+
+    flash(error)
+    return redirect(url_for('parties.parties'))
