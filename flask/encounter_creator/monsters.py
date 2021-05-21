@@ -132,11 +132,11 @@ def delete():
     elif status == 1:
         print("Name cannot be null or empty.")
         flash("Cannot delete an empty name")
-        return redirect(url_for('monsters.delete'))
+        return redirect(url_for('monsters.monsters'))
     elif status == 2:
         print("Monster does not exist.")
         flash("Cannot delete, monster doesn't exist")
-        return redirect(url_for('monsters.delete'))
+        return redirect(url_for('monsters.monsters'))
     else:
         print("Unknown error code in delete_party:", status)
         error = 'Server error - try again?'
@@ -190,10 +190,8 @@ def edit():
     cursor.commit()
     return redirect(url_for('monsters.monsters'))
 
-    flash(error)
-    return redirect(url_for('monsters.monsters'))
 
-@bp.route('/info/<name>', methods=['GET','POST'])
+@bp.route('/info/<name>', methods=['GET', 'POST'])
 @login_required
 def info(name):
     cursor = get_cursor()
@@ -214,7 +212,7 @@ def info(name):
             long_alignment = alignment_code_to_string(monster_info.Alignment, False)
         lowercase_type = str(monster_info.TypeName).lower()
     except (pyodbc.ProgrammingError, AttributeError):
-        status = monster_info.status
+        status = monster_info
 
     if status == 0:
         return render_template('monsters/info.html', monsters=monster_info,type=lowercase_type,alignment=long_alignment, actions=monster_actions)
